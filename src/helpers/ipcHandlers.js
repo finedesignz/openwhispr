@@ -438,7 +438,7 @@ async function chunkedCloudTranscribe({
   let inputPath = filePath;
   if (!inputPath && buffer) {
     tmpInputPath = path.join(os.tmpdir(), `ow-audio-${jobId}.webm`);
-    fs.writeFileSync(tmpInputPath, buffer);
+    fs.writeFileSync(tmpInputPath, buffer, { mode: 0o600 });
     inputPath = tmpInputPath;
   }
 
@@ -1699,13 +1699,6 @@ class IPCHandlers {
       void this.selectionManager?.captureTarget?.();
       const pid = (await this.textEditMonitor?.captureTargetPid?.()) ?? null;
       return { success: true, pid };
-    });
-
-    ipcMain.handle("force-stop-dictation", () => {
-      if (this.windowManager?.forceStopMacCompoundPush) {
-        this.windowManager.forceStopMacCompoundPush("manual");
-      }
-      return { success: true };
     });
 
     ipcMain.handle("set-main-window-interactivity", (event, shouldCapture) => {
@@ -3398,7 +3391,7 @@ class IPCHandlers {
         os.tmpdir(),
         `ow-voice-draft-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.webm`
       );
-      fs.writeFileSync(tempPath, Buffer.from(buffer));
+      fs.writeFileSync(tempPath, Buffer.from(buffer), { mode: 0o600 });
       return { success: true, path: tempPath };
     });
 
@@ -9204,7 +9197,7 @@ class IPCHandlers {
         if (!meetingDiarizationStream) {
           const os = require("os");
           meetingDiarizationPath = path.join(os.tmpdir(), `ow-diarize-raw-${Date.now()}.pcm`);
-          meetingDiarizationStream = fs.createWriteStream(meetingDiarizationPath);
+          meetingDiarizationStream = fs.createWriteStream(meetingDiarizationPath, { mode: 0o600 });
           meetingDiarizationStartedAt = receivedAt;
         }
         meetingDiarizationStream.write(outboundBuffer);
@@ -9237,7 +9230,7 @@ class IPCHandlers {
               os.tmpdir(),
               `ow-diarize-raw-mic-${receivedAt}.pcm`
             );
-            meetingMicDiarizationStream = fs.createWriteStream(meetingMicDiarizationPath);
+            meetingMicDiarizationStream = fs.createWriteStream(meetingMicDiarizationPath, { mode: 0o600 });
             meetingMicDiarizationStartedAt = receivedAt;
           }
           meetingMicDiarizationStream.write(outboundBuffer);
