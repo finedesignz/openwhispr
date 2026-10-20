@@ -13,6 +13,8 @@ function loadLoopback() {
     if (request === "electron") {
       return { shell: { openExternal() {} } };
     }
+    // Never reach the real opener: on win32 it spawns explorer.exe and opens a browser tab.
+    if (request.endsWith("externalUrlOpener")) return { openExternalUrl: async () => {} };
     return originalLoad.call(this, request, parent, isMain);
   };
   try {
