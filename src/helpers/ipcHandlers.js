@@ -9395,7 +9395,9 @@ class IPCHandlers {
               os.tmpdir(),
               `ow-diarize-raw-mic-${receivedAt}.pcm`
             );
-            meetingMicDiarizationStream = fs.createWriteStream(meetingMicDiarizationPath, { mode: 0o600 });
+            meetingMicDiarizationStream = fs.createWriteStream(meetingMicDiarizationPath, {
+              mode: 0o600,
+            });
             meetingMicDiarizationStartedAt = receivedAt;
           }
           meetingMicDiarizationStream.write(outboundBuffer);
