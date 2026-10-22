@@ -12,3 +12,4 @@
 - Sync note: use `git fetch https://github.com/OpenWhispr/openwhispr main` then `git push origin <sha>:refs/heads/main`.
 - Run 10-13 was light: no new bug-hunt PR (temp-file cleanup in audio/diarize paths reviewed: finally-unlinks present). Next: Bug hunt streaming-commit fallback, meeting seams, UI/UX.
 - Sync note 10-14: upstream may not be an ancestor of fork main; use `git merge <upstream sha>` then push HEAD:refs/heads/main.
+- Run 2026-10-22: pushed 0cdf5eb to PR #4 branch: vite ^8.1.6 + markdown-it 14.3.3 (hand-edited lock entries + override, mirrors upstream) under Node 24 (`npm i node@24 --prefix /tmp/n24`). `npm audit --audit-level=high` exit 0, `npm ci --dry-run` ok. Awaiting CI re-run; merge next run if green. Fork main still 81 commits behind upstream (push to main blocked-by-classifier earlier). No other work this run (time-boxed).
