@@ -23,6 +23,8 @@ function loadLoopback(opened) {
   for (const path of paths) delete require.cache[path];
   const originalLoad = Module._load;
   Module._load = function loadWithElectronMock(request, parent, isMain) {
+    // Record the URL instead of reaching the real opener (win32: explorer.exe opens a browser tab).
+    if (request.endsWith("externalUrlOpener")) return { openExternalUrl: async (url) => opened.push(url) };
     if (request === "electron") return { shell: { openExternal: async (url) => opened.push(url) } };
     return originalLoad.call(this, request, parent, isMain);
   };
