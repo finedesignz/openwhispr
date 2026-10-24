@@ -10,7 +10,7 @@ const source = fs.readFileSync(path.join(__dirname, "../../src/helpers/ipcHandle
 test("temp audio files are created owner-only", () => {
   const writes = [
     /createWriteStream\(meetingDiarizationPath,\s*\{\s*mode:\s*0o600\s*\}\)/,
-    /createWriteStream\(meetingMicDiarizationPath,\s*\{\s*mode:\s*0o600\s*\}\)/,
+    /createWriteStream\(meetingMicDiarizationPath,\s*\{\s*mode:\s*0o600,?\s*\}\)/,
     /writeFileSync\(tmpInputPath,\s*buffer,\s*\{\s*mode:\s*0o600\s*\}\)/,
     /writeFileSync\(tempPath,\s*Buffer\.from\(buffer\),\s*\{\s*mode:\s*0o600\s*\}\)/,
   ];

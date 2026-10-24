@@ -1286,6 +1286,8 @@ function loadLoopbackFlow() {
   const originalLoad = Module._load;
   Module._load = function loadWithElectronStub(request, parent, isMain) {
     if (request === "electron") return { shell: { openExternal: async () => {} } };
+    // Never reach the real opener: on win32 it spawns explorer.exe and opens a browser tab.
+    if (request.endsWith("externalUrlOpener")) return { openExternalUrl: async () => {} };
     return originalLoad.call(this, request, parent, isMain);
   };
   try {
