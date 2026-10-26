@@ -1091,3 +1091,23 @@ test("the local-history policy is resolved only once the fetch has settled", asy
   assert.equal(isLocalHistoryPolicyResolved(snapshot("loading")), false);
   assert.equal(isLocalHistoryPolicyResolved(snapshot("error")), false);
 });
+
+test("cloud disabled resolves to an unmanaged policy that allows any transcription selection", async () => {
+  const { cloudDisabledPolicyState, isTranscriptionSelectionAllowed } = await load();
+  assert.equal(cloudDisabledPolicyState(true), null);
+  const disabled = cloudDisabledPolicyState(false);
+  assert.deepEqual(disabled, { status: "unmanaged", policy: null });
+  const state = { ...disabled, appVersion: "1.0.0" };
+  assert.equal(
+    isTranscriptionSelectionAllowed(state, { mode: "providers", provider: "custom" }),
+    true
+  );
+  // The failure this prevents: a failed fetch leaves status "error", which fails closed.
+  assert.equal(
+    isTranscriptionSelectionAllowed(
+      { status: "error", policy: null, appVersion: null },
+      { mode: "providers", provider: "custom" }
+    ),
+    false
+  );
+});

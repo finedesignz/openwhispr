@@ -7,7 +7,8 @@ import {
   shouldAcceptPolicySnapshot,
   shouldPreserveResolvedPolicyOnFailure,
 } from "./policyLifecycle";
-import type { PolicyDecisionSnapshot } from "./policyRules";
+import { cloudDisabledPolicyState, type PolicyDecisionSnapshot } from "./policyRules";
+import { CLOUD_ENABLED } from "../config/forkRuntime";
 
 export interface PolicyState extends PolicyDecisionSnapshot {
   /** Account whose policy is represented by this renderer state. */
@@ -191,6 +192,21 @@ export const usePolicyStore = create<PolicyState>()((set, get) => {
     policy: null,
     appVersion: null,
     fetchPolicy: (accountId: string, authGeneration: number): Promise<void> => {
+      const disabled = cloudDisabledPolicyState(CLOUD_ENABLED);
+      if (disabled) {
+        fetchSequence += 1;
+        fetchInFlight = null;
+        set({
+          accountId: null,
+          authGeneration: null,
+          revision: 0,
+          status: disabled.status,
+          managed: false,
+          policy: null,
+          appVersion: null,
+        });
+        return Promise.resolve();
+      }
       ensurePolicyLifecycleListeners();
       if (
         fetchInFlight?.accountId === accountId &&
