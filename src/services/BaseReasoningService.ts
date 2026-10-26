@@ -3,6 +3,7 @@ import { getSettings } from "../stores/settingsStore";
 import { resolveCleanupLanguage } from "../utils/chineseScript";
 import { getDictionaryHintWords } from "../utils/snippets";
 import type { InferenceScope } from "../config/inferenceScopes";
+import type { DictationToneStyle } from "../config/toneStyle";
 import type { ScreenContextImage } from "../types/electron";
 
 export interface ReasoningConfig {
@@ -18,6 +19,8 @@ export interface ReasoningConfig {
   reasoningEffort?: string;
   /** Screenshot attached to voice-agent requests when screen context is on. */
   screenContext?: ScreenContextImage;
+  /** Dictation cleanup only: the Tone & Style tone for the app being dictated into. */
+  toneStyle?: DictationToneStyle | null;
   /** Suffix-free prompt used when a screenshot-carrying request is retried text-only. */
   textOnlySystemPrompt?: string;
   language?: string;
@@ -31,7 +34,10 @@ export interface ReasoningConfig {
    * it still lets the allowance shrink to fit, where that flag alone refuses.
    */
   refuseClippedByWindow?: boolean;
-  /** Local models only: tags the request so `cancelLocalReasoning` can abort it. */
+  /**
+   * Tags the request so a cancel can abort it: `cancelLocalReasoning` for local
+   * models, `cancelRequest` (ai/requestCancellation) for the renderer's HTTP routes.
+   */
   requestId?: string;
   requiresAgent?: boolean;
   inferenceScope?: InferenceScope;
@@ -55,12 +61,16 @@ export abstract class BaseReasoningService {
     return getSettings().uiLanguage || "en";
   }
 
-  protected getSystemPrompt(agentName: string | null): string {
+  protected getSystemPrompt(
+    agentName: string | null,
+    toneStyle?: DictationToneStyle | null
+  ): string {
     return getCleanupSystemPrompt(
       agentName,
       this.getCustomDictionary(),
       this.getPreferredLanguage(),
-      this.getUiLanguage()
+      this.getUiLanguage(),
+      toneStyle
     );
   }
 

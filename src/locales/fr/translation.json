@@ -343,7 +343,7 @@
           }
         },
         "byok": {
-          "title": "Fournisseur d’API",
+          "title": "Apportez votre propre clé",
           "description": "Utilisez votre propre clé API."
         },
         "local": {
@@ -412,15 +412,14 @@
         "optional": "Facultatif",
         "modelId": "ID du modèle",
         "modelIdPlaceholder": "Saisissez l’ID de votre modèle",
-        "testConnection": "Tester la connexion",
         "proceed": "Continuer",
         "clinical": "POUR LA TRANSCRIPTION CLINIQUE",
         "clientId": "Client ID",
         "clientSecret": "Client secret",
-        "runTest": "Lancer le test",
         "testing": "Test en cours…",
         "connected": "Connecté",
         "connectionFailed": "La connexion n’a pas pu être vérifiée.",
+        "unverified": "Vérification impossible : {{reason}}",
         "errors": {
           "endpointRequired": "Saisissez l’URL de l’endpoint avant de lancer le test.",
           "invalidUrl": "L’endpoint doit être une URL HTTP ou HTTPS valide.",
@@ -429,6 +428,7 @@
           "apiKeyRequired": "Ajoutez une clé API avant de lancer le test.",
           "credentialsRejected": "Le fournisseur a rejeté ces identifiants.",
           "endpointNotFound": "L’endpoint n’expose pas de liste de modèles compatible OpenAI.",
+          "transcriptionEndpointNotFound": "Cette adresse n’accepte pas de transcriptions.",
           "modelNotFound": "Le modèle sélectionné n’est pas disponible auprès de ce fournisseur.",
           "providerStatus": "Le fournisseur a renvoyé le statut {{status}}.",
           "timeout": "Le test de connexion a expiré.",
@@ -875,8 +875,11 @@
         "apikeyHelp": "Clé API Vertex AI Express Mode obtenue depuis Google AI Studio."
       }
     },
+    "modelRetiredTitle": "Modèle non disponible",
+    "groq": {
+      "modelRetired": "Groq a retiré {{from}}. Basculé vers {{to}}."
+    },
     "tinfoil": {
-      "modelRetiredTitle": "Modèle non disponible",
       "modelRetired": "Tinfoil a retiré {{from}}. Basculé vers {{to}}.",
       "refreshingModels": "Actualisation des modèles…"
     },
@@ -1648,6 +1651,10 @@
         "description": "Raccourci de dictée et activation",
         "label": "Raccourcis"
       },
+      "toneStyle": {
+        "label": "Ton et style",
+        "description": "Comment la correction écrit dans chaque app"
+      },
       "speechToText": {
         "description": "Moteurs pour dictée et enregistrement de notes",
         "label": "Reconnaissance vocale"
@@ -2042,6 +2049,8 @@
       },
       "rollingWeeklyLimit": "Limite hebdomadaire glissante",
       "signOut": {
+        "endMeetingDescription": "La déconnexion arrête l'enregistrement de la réunion en cours. Ce qui a déjà été capturé reste dans sa note.",
+        "endMeetingTitle": "Arrêter l'enregistrement de la réunion ?",
         "failedDescription": "Un problème est survenu lors de la déconnexion. Veuillez réessayer.",
         "failedTitle": "Impossible de se déconnecter",
         "signOut": "Se déconnecter",
@@ -2149,12 +2158,12 @@
       "enableTextCleanupDescription": "L'IA supprime les mots de remplissage, corrige la grammaire et la ponctuation",
       "modes": {
         "openwhispr": "OpenWhispr Cloud",
-        "providers": "Fournisseurs cloud",
+        "providers": "Apportez votre propre clé",
         "local": "Local",
         "selfHosted": "Auto-hébergé",
         "enterprise": "Enterprise",
         "openwhisprDesc": "Résultats fiables. Aucune configuration requise.",
-        "providersDesc": "Utilisez votre propre clé API.",
+        "providersDesc": "Utilisez votre propre clé API pour connecter votre fournisseur de LLM préféré.",
         "localDesc": "Modèles sur l'appareil. 100 % privé.",
         "selfHostedDesc": "Votre serveur sur votre réseau.",
         "enterpriseDesc": "Utilisez le compte cloud de votre organisation (AWS, Azure, GCP)."
@@ -2172,7 +2181,7 @@
           "title": "Basculé vers la configuration personnalisée"
         },
         "switchedProviders": {
-          "title": "Fournisseurs cloud",
+          "title": "Apportez votre propre clé",
           "description": "Utilisation de vos propres clés API."
         },
         "switchedLocal": {
@@ -2397,15 +2406,11 @@
             "step1Desc": "Démarrez ydotoold et activez-le pour qu'il se lance à chaque connexion.",
             "step2Title": "Vérifier qu'il est en cours d'exécution"
           },
-          "xclip": {
-            "step1Title": "Installer xclip"
-          },
           "wlCopy": {
             "step1Title": "Installer wl-clipboard",
             "step2Title": "Vérifier l'installation"
           }
         },
-        "xclipDesc": "Outil de presse-papiers pour le collage KDE Wayland (xclip ou xsel)",
         "nixos": {
           "intro": "Vous êtes sur NixOS. Le collage automatique nécessite ydotool et l'accès à /dev/uinput, que NixOS accorde de façon déclarative.",
           "detected": "Détecté",
@@ -2771,6 +2776,9 @@
         "openai_gpt_4_1_nano": "GPT-4.1 à la latence la plus faible",
         "anthropic_claude_fable_5_1": "Le modèle le plus performant d'Anthropic, classe Mythos",
         "anthropic_claude_fable_5": "Ancien modèle phare de classe Mythos",
+        "anthropic_claude_opus_5_5": "Dernier modèle Opus pour le raisonnement complexe, contexte 1M",
+        "anthropic_claude_sonnet_5_5": "Dernier Sonnet : rapide et performant au quotidien, contexte 1M",
+        "anthropic_claude_haiku_5_5": "Le modèle Claude le plus rapide et le moins cher, contexte 1M",
         "anthropic_claude_sonnet_5": "Modèle assistant rapide et performant à moindre coût",
         "anthropic_claude_sonnet_4_6": "Performances équilibrées",
         "anthropic_claude_sonnet_4_5": "Génération Sonnet précédente",
@@ -2786,14 +2794,12 @@
         "groq_openai_gpt_oss_120b": "Modèle phare open source d'OpenAI, 500 T/s",
         "groq_qwen_qwen3_8_27b": "Modèle Qwen rapide, 450 T/s, contexte 131K",
         "groq_openai_gpt_oss_20b": "Modèle open source rapide, 1000 T/s",
-        "groq_compound": "Système compound de Groq, 450 T/s",
-        "groq_compound_mini": "Système compound rapide, 3x latence réduite",
         "openai_gpt_6_astra": "Le modèle le plus performant d'OpenAI pour le codage et la recherche",
         "openai_gpt_5_6_sol": "GPT-5.6 phare pour le codage et la recherche complexes",
         "openai_gpt_5_6_terra": "GPT-5.6 équilibré pour le travail quotidien",
         "openai_gpt_5_6_luna": "Le GPT-5.6 le plus rapide et le plus économique",
         "openai_gpt_5_5": "Modèle frontier pour le raisonnement complexe",
-        "anthropic_claude_opus_5": "Le modèle Opus le plus performant, contexte 1M",
+        "anthropic_claude_opus_5": "Ancien modèle phare Opus, contexte 1M",
         "anthropic_claude_opus_4_8": "Modèle Opus puissant axé sur l'honnêteté et la fiabilité",
         "anthropic_claude_opus_4_7": "Modèle Opus puissant",
         "anthropic_claude_opus_4_6": "Génération Opus précédente, contexte 1M",
@@ -2996,7 +3002,6 @@
     "upload": "Importer",
     "dictionary": "Dictionnaire",
     "referral": "Obtenir un mois gratuit",
-    "inviteTeam": "Invitez votre équipe",
     "settings": "Paramètres",
     "support": "Assistance",
     "limitReached": "Limite cloud hebdomadaire atteinte",
@@ -3010,7 +3015,7 @@
     "learnMore": "En savoir plus",
     "integrations": "Intégrations",
     "defaultUser": "Utilisateur",
-    "notSignedIn": "Non connecté",
+    "accountMenu": "Compte : {{name}}",
     "chat": "Chat",
     "collapse": "Réduire la barre latérale",
     "expand": "Développer la barre latérale"
@@ -3018,7 +3023,9 @@
   "workspaces": {
     "switcher": {
       "workspaces": "Espaces de travail",
-      "create": "Créer un espace de travail…"
+      "create": "Créer un espace de travail…",
+      "add": "Ajouter un espace de travail",
+      "invitePeople": "Inviter des personnes"
     },
     "create": {
       "title": "Créer un espace de travail",
@@ -3448,6 +3455,25 @@
       "typeEmail": "Saisissez un e-mail pour ajouter...",
       "me": "(moi)"
     },
+    "eventLink": {
+      "selectEvent": "Sélectionner un événement",
+      "searchPlaceholder": "Rechercher un événement…",
+      "back": "Retour",
+      "removeEvent": "Retirer l'événement",
+      "allDay": "Toute la journée",
+      "noEventsOnDay": "Aucun événement ce jour-là",
+      "searchOtherDays": "Recherchez pour trouver des événements d'autres jours",
+      "outsideWindow": "Seuls les événements des {{days}} derniers jours peuvent être liés",
+      "noResults": "Aucun événement correspondant",
+      "noCalendar": "Connectez un calendrier dans Intégrations pour lier des événements",
+      "loadFailed": "Impossible de charger les événements du calendrier",
+      "join": "Rejoindre",
+      "calendar": "Calendrier",
+      "openInGoogle": "Ouvrir dans Google Calendar",
+      "openInOutlook": "Ouvrir dans Outlook",
+      "linkedEvent": "Événement du calendrier",
+      "unavailable": "Cet événement ne figure dans aucun de vos calendriers sur cet appareil"
+    },
     "upload": {
       "title": "Téléverser un fichier audio",
       "using": "Utilisation de {{model}}",
@@ -3672,6 +3698,9 @@
         "actionFailed": "L'action a échoué",
         "noEndpoint": "Aucune URL de serveur auto-hébergé définie. Configurez-en une dans les Paramètres.",
         "outputTruncated": "Le modèle d'IA a manqué de place avant d'avoir fini, la note reste donc inchangée.",
+        "outputSpentThinking": "Le modèle d'IA a consacré toute sa limite de sortie à la réflexion sans écrire de notes, la note reste donc inchangée. Activez « Désactiver la sortie de raisonnement » ou choisissez un modèle qui réfléchit moins dans Réglages → Modèles de langage → Mise en forme des notes, puis réessayez.",
+        "outputSpentThinkingDisabled": "Le modèle d'IA a consacré toute sa limite de sortie à la réflexion sans écrire de notes, même avec « Désactiver la sortie de raisonnement » activé, la note reste donc inchangée. Choisissez un autre modèle dans Réglages → Modèles de langage → Mise en forme des notes.",
+        "outputSpentThinkingOtherModel": "Le modèle d'IA a consacré toute sa limite de sortie à la réflexion sans écrire de notes, la note reste donc inchangée. Choisissez un modèle qui réfléchit moins dans Réglages → Modèles de langage → Mise en forme des notes.",
         "nothingToSummarize": "Cette note n'a encore rien à résumer, donc le résumé IA est resté tel quel.",
         "saveFailed": "Enregistrement impossible. Vérifiez que rien n'est trop long, puis réessayez."
       },
@@ -3748,6 +3777,7 @@
       "typeNamePlaceholder": "Saisir un nom",
       "nameOrEmailPlaceholder": "Tapez un nom ou un e-mail",
       "knownSpeakers": "Interlocuteurs connus",
+      "thisIsMe": "C'est moi",
       "meetingAttendees": "Participants à la réunion",
       "createNewPrefix": "Créer",
       "addContact": "Ajouter un contact",
@@ -3820,6 +3850,16 @@
       "applied": "L’assistant a modifié « {{title}} »",
       "changed": "Cette note a changé après la modification de l’assistant. Il n’est plus possible de l’annuler.",
       "failed": "Impossible d’annuler la modification. Réessayez."
+    },
+    "folderMore": {
+      "more": "{{count}} de plus",
+      "search": "Rechercher {{count}} notes dans {{folder}}",
+      "newest": "Plus récentes en premier",
+      "openFolder": "Ouvrir le dossier",
+      "empty": "Aucune note correspondante",
+      "loading": "Chargement des notes…",
+      "retry": "Impossible de charger les notes. Réessayer",
+      "results": "{{count}} sur {{total}} notes"
     }
   },
   "dictionary": {
@@ -3902,6 +3942,12 @@
     "active": "Accélération GPU active",
     "ready": "Accélération GPU prête",
     "activating": "Activation du GPU...",
+    "activeBackend": "Accélération {{backend}} active",
+    "readyBackend": "Accélération {{backend}} prête",
+    "activatingBackend": "Activation de {{backend}}...",
+    "enableBackend": "Activer {{backend}}",
+    "cudaDescription": "Accélération CUDA pour les GPU NVIDIA compatibles. Nécessite un pilote NVIDIA actuel et compatible.",
+    "vulkanDescription": "Accélération Vulkan pour les GPU AMD, Intel et NVIDIA compatibles.",
     "activationFailed": "Accélération GPU indisponible",
     "activationFailedDescription": "OpenWhispr est passé à la transcription par CPU.",
     "reasoningActivationFailedDescription": "OpenWhispr est passé au traitement par CPU.",
@@ -3979,18 +4025,6 @@
       "permissionDescription": "macOS exige l'autorisation d'enregistrement de l'écran pour capturer votre écran.",
       "relaunchHint": "L'enregistrement d'écran a été autorisé pendant qu'OpenWhispr était en cours d'exécution. Quittez et rouvrez OpenWhispr pour commencer à capturer des captures d'écran."
     },
-    "modes": {
-      "openwhispr": "OpenWhispr Cloud",
-      "openwhisprDesc": "Utilisez l'assistant géré par OpenWhispr, sans clé API.",
-      "providers": "Utilisez votre propre clé API",
-      "providersDesc": "Connectez-vous à OpenAI, Anthropic, Gemini ou Groq avec votre propre clé API.",
-      "local": "Local",
-      "localDesc": "Exécutez un LLM local sur votre appareil, 100 % privé.",
-      "selfHosted": "Auto-hébergé",
-      "selfHostedDesc": "Pointez vers un point de terminaison auto-hébergé compatible OpenAI.",
-      "enterprise": "Enterprise",
-      "enterpriseDesc": "Utilisez AWS Bedrock, Azure OpenAI ou Google Vertex."
-    },
     "prompt": {
       "title": "Invite de l'assistant",
       "description": "L'invite système utilisée lorsque le mot de réveil est détecté. Revient à l'invite par défaut intégrée."
@@ -4000,19 +4034,7 @@
     "settings": {
       "systemPrompt": "Prompt système",
       "systemPromptDescription": "Instructions personnalisées pour l'assistant",
-      "systemPromptPlaceholder": "Entrez un prompt système personnalisé...",
-      "modes": {
-        "openwhispr": "OpenWhispr Cloud",
-        "providers": "Fournisseurs Cloud",
-        "local": "Local",
-        "selfHosted": "Auto-hébergé",
-        "enterprise": "Enterprise",
-        "openwhisprDesc": "Résultats fiables. Aucune configuration requise.",
-        "providersDesc": "Apportez votre propre clé API.",
-        "localDesc": "Modèles sur l'appareil. Entièrement privé.",
-        "selfHostedDesc": "Votre propre serveur sur votre réseau.",
-        "enterpriseDesc": "Utilisez le compte cloud de votre organisation (AWS, Azure, GCP)."
-      }
+      "systemPromptPlaceholder": "Entrez un prompt système personnalisé..."
     },
     "chat": {
       "errorPrefix": "Erreur",
@@ -4922,6 +4944,91 @@
     "details": {
       "provider": "Fournisseur",
       "requestId": "ID de requête"
+    }
+  },
+  "toneStyle": {
+    "title": "Ton et style",
+    "description": "Définissez votre ton et votre style selon les apps.",
+    "turnOnAndSetUp": "Activer et configurer",
+    "categories": {
+      "personal": {
+        "title": "Messages personnels",
+        "inline": "vos messages personnels",
+        "question": "Comment écrivez-vous\n{{category}} ?"
+      },
+      "work": {
+        "title": "Messages pro",
+        "inline": "vos messages pro",
+        "question": "Comment écrivez-vous\n{{category}} ?"
+      },
+      "email": {
+        "title": "E-mails",
+        "inline": "vos e-mails",
+        "question": "Comment écrivez-vous\n{{category}} ?"
+      },
+      "other": {
+        "title": "Autres apps",
+        "inline": "dans les autres apps",
+        "question": "Comment écrivez-vous\n{{category}} ?"
+      }
+    },
+    "tones": {
+      "formal": "Formel",
+      "casual": "Décontracté",
+      "very_casual": "Très décontracté",
+      "excited": "Enthousiaste !"
+    },
+    "samples": {
+      "personal": {
+        "formal": "Bonsoir, es-tu disponible ce soir ? Je pensais que nous pourrions prendre un café vers 18 h. Tiens-moi au courant.",
+        "casual": "Salut, t'es dispo ce soir ? Je pensais à un café vers 18 h, dis-moi",
+        "very_casual": "slt t dispo ce soir ? café vers 18h ? dis moi"
+      },
+      "work": {
+        "sender": "Jimmy",
+        "time": "18:20",
+        "formal": "Bonjour, pourrais-tu m'envoyer la présentation avant l'appel ? Les chiffres de la diapo 3 semblent obsolètes. Rien d'urgent.",
+        "casual": "Hello, tu peux m'envoyer la présentation avant l'appel ? Je crois que les chiffres de la diapo 3 sont vieux, rien d'urgent.",
+        "excited": "Hello ! Tu peux m'envoyer la présentation avant l'appel ? Les chiffres de la diapo 3 sont sûrement anciens, rien d'urgent !"
+      },
+      "email": {
+        "to": "À Sarah",
+        "formal": "Bonjour Sarah,\n\nMerci pour votre temps aujourd'hui. Je vous enverrai la proposition révisée d'ici jeudi. N'hésitez pas à me solliciter d'ici là.\n\nBien cordialement",
+        "casual": "Bonjour Sarah,\n\nMerci pour aujourd'hui. Je t'envoie la proposition mise à jour d'ici jeudi, dis-moi si tu as besoin de quelque chose avant.\n\nMerci",
+        "excited": "Bonjour Sarah,\n\nMerci beaucoup pour aujourd'hui ! Je t'envoie la proposition révisée d'ici jeudi. Dis-moi si tu as besoin de quelque chose !\n\nMerci"
+      },
+      "other": {
+        "formal": "Notes de l'appel : ils ont apprécié la page des tarifs et souhaitent un onboarding plus court. Les relancer la semaine prochaine.",
+        "casual": "Notes d'appel : page des tarifs appréciée, onboarding à raccourcir. Relancer la semaine pro",
+        "excited": "Notes d'appel : ils ont adoré la page des tarifs ! Onboarding à raccourcir. Relancer la semaine prochaine !"
+      }
+    },
+    "setup": {
+      "introTitle": "Faites écrire OpenWhispr\ncomme vous parlez",
+      "introDescription": "Définissez votre ton et votre style selon les apps.",
+      "personalize": "Personnaliser",
+      "cleanupOffTitle": "Apprenez votre style\nà OpenWhispr",
+      "cleanupOffDescription": "Activez la correction de texte, puis définissez votre ton et votre style selon les apps.",
+      "stepDescription": "Choisissez l'exemple qui vous ressemble le plus.",
+      "progress": "Étape {{current}} sur {{total}}",
+      "finish": "Terminer"
+    },
+    "banner": {
+      "title": "Apprenez à OpenWhispr comment vous écrivez",
+      "description": "Choisissez votre ton préféré pour le travail, les amis et tout ce qu'il y a entre les deux.",
+      "start": "Commencer",
+      "cleanupOffTitle": "Apprenez votre style à OpenWhispr",
+      "cleanupOffDescription": "Activez la correction de texte et choisissez un ton pour chaque app.",
+      "notNow": "Pas maintenant",
+      "decoration": "Vos mots devraient vous ressembler. Quoi que vous écriviez, pour qui que ce soit."
+    },
+    "settings": {
+      "saveChanges": "Enregistrer les modifications",
+      "saved": "Ton et style enregistrés",
+      "cleanupOff": "La correction de texte est désactivée, donc ces tons ne s'appliquent pas à votre dictée. L'assistant et les chats les utilisent toujours.",
+      "turnOnCleanup": "Activer la correction de texte",
+      "enabled": "Tons et voix activés",
+      "enabledDescription": "La correction de texte, l'assistant et les chats utilisent votre ton pour chaque type d'app. Si c'est désactivé, le ton standard s'applique."
     }
   },
   "productHelp": {
