@@ -1,3 +1,5 @@
+import { CLOUD_ENABLED, SITE_URL } from "../config/forkRuntime";
+import { gateSettingsSection } from "../config/cloudSections";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
@@ -544,14 +546,18 @@ function TranscriptionSection({
     isModeAllowed,
   } = usePolicyModeOptions<InferenceModeOption>(
     [
-      {
-        id: "openwhispr",
-        label: t("settingsPage.transcription.modes.openwhispr"),
-        description: t("settingsPage.transcription.modes.openwhisprDesc"),
-        icon: <Cloud className="w-4 h-4" />,
-        disabled: !isSignedIn,
-        signInRequired: !isSignedIn,
-      },
+      ...(CLOUD_ENABLED
+        ? [
+            {
+              id: "openwhispr" as const,
+              label: t("settingsPage.transcription.modes.openwhispr"),
+              description: t("settingsPage.transcription.modes.openwhisprDesc"),
+              icon: <Cloud className="w-4 h-4" />,
+              disabled: !isSignedIn,
+              signInRequired: !isSignedIn,
+            },
+          ]
+        : []),
       {
         id: "providers",
         label: t("settingsPage.transcription.modes.providers"),
@@ -2181,7 +2187,7 @@ export default function SettingsPage({
   );
 
   const renderSectionContent = () => {
-    switch (activeSection) {
+    switch (gateSettingsSection(activeSection, CLOUD_ENABLED)) {
       case "account":
         return (
           <div className="space-y-5">
@@ -2887,9 +2893,7 @@ export default function SettingsPage({
                             size="sm"
                             className="w-full h-6 text-[10px] text-muted-foreground"
                             onClick={() =>
-                              window.electronAPI?.openExternal?.(
-                                "https://openwhispr.com/contact-sales"
-                              )
+                              window.electronAPI?.openExternal?.(`${SITE_URL}/contact-sales`)
                             }
                           >
                             <Mail size={10} />
@@ -2903,9 +2907,7 @@ export default function SettingsPage({
                             size="sm"
                             className="w-full h-6 text-[10px]"
                             onClick={() =>
-                              window.electronAPI?.openExternal?.(
-                                "https://openwhispr.com/contact-sales"
-                              )
+                              window.electronAPI?.openExternal?.(`${SITE_URL}/contact-sales`)
                             }
                           >
                             <Mail size={10} />
@@ -2925,9 +2927,7 @@ export default function SettingsPage({
                           size="sm"
                           className="mt-2 w-full h-6 text-[10px]"
                           onClick={() =>
-                            window.electronAPI?.openExternal?.(
-                              "https://openwhispr.com/contact-sales"
-                            )
+                            window.electronAPI?.openExternal?.(`${SITE_URL}/contact-sales`)
                           }
                         >
                           <Mail size={10} />

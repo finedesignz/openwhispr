@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle } from "./icons";
+import { CLOUD_ENABLED } from "../config/forkRuntime";
 import { CompactAuthenticationFlow } from "./CompactAuthenticationFlow";
 import UseCaseStep from "./onboarding/UseCaseStep";
 import { hasUseCaseIntent } from "./onboarding/useCases";
@@ -51,6 +52,7 @@ import {
   getOnboardingProgress,
   getOnboardingRoute,
   isSetupDecisionStep,
+  resolveAuthPathForCloud,
   reconcileStepWithRoute,
   resetOnboardingProgress,
   resolveEnterpriseWorkspaceForOnboarding,
@@ -330,6 +332,13 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     ]
   );
   const currentStepId = reconcileStepWithRoute(session.currentStepId, route);
+  // Without a hosted account backend there is nothing to sign in to: take the guest
+  // path and never show the auth step.
+  useEffect(() => {
+    if (resolveAuthPathForCloud(CLOUD_ENABLED, session.authPath) === session.authPath) return;
+    setAuthPath("guest");
+    if (currentStepId === "auth") goTo("permissions");
+  }, [currentStepId, goTo, session.authPath, setAuthPath]);
   const compact = COMPACT_STEPS.has(currentStepId);
   const setupDecisionPending =
     workspaceResolutionPending && isSetupDecisionStep(currentStepId, route);

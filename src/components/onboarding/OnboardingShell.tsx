@@ -1,3 +1,4 @@
+import { SITE_URL } from "../../config/forkRuntime";
 import type { CSSProperties, ReactNode } from "react";
 import type { OnboardingProgressState } from "./flow";
 import { ArrowLeft, Copy, Minus, Square, X } from "../icons";
@@ -376,11 +377,11 @@ export function CompactOnboardingFrame({
         {children}
       </div>
 
-      {showLegalNotice && (
+      {showLegalNotice && SITE_URL && (
         <p className="relative z-10 mx-auto mt-auto w-full max-w-sm shrink-0 px-2 pb-4 pt-5 text-center text-xs leading-[18px] text-[var(--onboarding-text-secondary)]">
           {t("auth.legal.prefix")}{" "}
           <a
-            href="https://openwhispr.com/terms"
+            href={`${SITE_URL}/terms`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[var(--onboarding-link)] transition-colors hover:opacity-80"
@@ -389,7 +390,7 @@ export function CompactOnboardingFrame({
           </a>{" "}
           {t("auth.legal.and")}{" "}
           <a
-            href="https://openwhispr.com/privacy"
+            href={`${SITE_URL}/privacy`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[var(--onboarding-link)] transition-colors hover:opacity-80"

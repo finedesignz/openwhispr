@@ -1,3 +1,4 @@
+import { CLOUD_ENABLED } from "../config/forkRuntime";
 import React, { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -194,12 +195,14 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     null
   );
   const usage = useUsage();
-  const upsell = decideUpsell({
-    authLoaded,
-    isSignedIn,
-    hasPaidAccess: usage?.hasPaidAccess ?? null,
-    isPastDue: usage?.isPastDue ?? false,
-  });
+  const upsell = CLOUD_ENABLED
+    ? decideUpsell({
+        authLoaded,
+        isSignedIn,
+        hasPaidAccess: usage?.hasPaidAccess ?? null,
+        isPastDue: usage?.isPastDue ?? false,
+      })
+    : "hide";
 
   const {
     status: updateStatus,

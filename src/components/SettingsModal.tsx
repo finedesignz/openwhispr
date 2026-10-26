@@ -1,3 +1,5 @@
+import { CLOUD_ENABLED } from "../config/forkRuntime";
+import { gateSettingsSection } from "../config/cloudSections";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePolicyStore } from "../stores/policyStore";
@@ -127,12 +129,18 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
         group: t("settingsModal.groups.system"),
       },
     ];
-    return isSignedIn ? items : items.filter((item) => item.id !== "workspace");
+    const cloudOnly = new Set<SettingsSectionType>(["account", "plansBilling", "workspace"]);
+    return items.filter((item) =>
+      CLOUD_ENABLED ? isSignedIn || item.id !== "workspace" : !cloudOnly.has(item.id)
+    );
   }, [t, isSignedIn]);
 
   const resolveSection = (section: string | undefined): SettingsSectionType => {
-    if (!section) return "account";
-    return (SECTION_ALIASES[section] ?? section) as SettingsSectionType;
+    if (!section) return CLOUD_ENABLED ? "account" : "general";
+    return gateSettingsSection(
+      (SECTION_ALIASES[section] ?? section) as SettingsSectionType,
+      CLOUD_ENABLED
+    );
   };
 
   const [activeSection, setActiveSection] = React.useState<SettingsSectionType>(() =>

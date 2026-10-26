@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { DOCS_URL } from "../../config/forkRuntime";
 import { useTranslation } from "react-i18next";
 import { BookOpen } from "../icons";
 import { Badge } from "../ui/badge";
@@ -10,7 +11,7 @@ import {
   type SectionMeta,
 } from "./integrationsSections";
 
-export const INTEGRATIONS_DOCS_URL = "https://docs.openwhispr.com";
+export const INTEGRATIONS_DOCS_URL = DOCS_URL;
 
 interface IntegrationsNavProps {
   active: IntegrationsSection;
