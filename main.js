@@ -891,18 +891,7 @@ function handleInvitationDeepLink(deepLinkUrl) {
 }
 
 function resolveAuthUrl() {
-  const fs = require("fs");
-  const envPath = path.join(__dirname, "src", "dist", "runtime-env.json");
-  let runtimeEnv = {};
-  try {
-    if (fs.existsSync(envPath)) runtimeEnv = JSON.parse(fs.readFileSync(envPath, "utf8"));
-  } catch {}
-  return (
-    process.env.AUTH_URL ||
-    process.env.VITE_AUTH_URL ||
-    runtimeEnv.VITE_AUTH_URL ||
-    "https://auth.openwhispr.com"
-  );
+  return require("./src/config/forkConfig").getAuthUrl();
 }
 
 function getOauthCookieName() {
@@ -914,6 +903,7 @@ function getOauthCookieName() {
 // Older website builds send the signed cookie value as `?token=`; trade it
 // for the raw session.token the bearer plugin expects.
 async function exchangeSignedTokenForRawBearer(signedToken) {
+  if (!resolveAuthUrl()) return null;
   try {
     const res = await net.fetch(`${resolveAuthUrl()}/api/auth/get-session`, {
       headers: { Cookie: `${getOauthCookieName()}=${signedToken}` },
@@ -943,6 +933,7 @@ async function migrateCookieToBearerToken() {
 
   const cookieName = getOauthCookieName();
   const authUrl = resolveAuthUrl();
+  if (!authUrl) return; // cloud disabled: nothing to migrate
 
   try {
     const cookies = await session.defaultSession.cookies.get({ url: authUrl, name: cookieName });

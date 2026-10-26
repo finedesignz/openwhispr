@@ -59,7 +59,9 @@ function parseRpc(text, id) {
   throw new Error("Missing help response");
 }
 
-function createProductHelp({ fetch, now = Date.now }) {
+const LIVE_LOOKUP = Boolean(require("../config/forkConfig").fork.DOCS_URL);
+
+function createProductHelp({ fetch, now = Date.now, live = LIVE_LOOKUP }) {
   // Public, fixed-topic queries only: no account credentials, settings or user text.
   let windowStart = now();
   let requests = 0;
@@ -72,6 +74,8 @@ function createProductHelp({ fetch, now = Date.now }) {
         "Invalid help request: use an exact path returned for this topic, including its leading slash and without .mdx. Stop retrying the path; request the topic essentials instead."
       );
     if (signal.aborted) throw new Error("Cancelled");
+    // No docs site configured (fork default): never contact the upstream docs host.
+    if (!live) return bundled(topic, "unavailable");
     if (allowed !== true && allowed !== "allowed")
       return bundled(
         topic,
@@ -187,8 +191,8 @@ function remoteHelpAllowed(snapshot, appVersion) {
   return remoteHelpPolicyState(snapshot, appVersion) === "allowed";
 }
 
-function registerProductHelpIpc({ ipcMain, fetch, canLookup, getBasics }) {
-  const help = createProductHelp({ fetch });
+function registerProductHelpIpc({ ipcMain, fetch, canLookup, getBasics, live }) {
+  const help = createProductHelp({ fetch, live });
   const requests = new AgentStreamRequestRegistry();
   const active = new Map();
   ipcMain.handle("product-help-basics", () => getBasics());

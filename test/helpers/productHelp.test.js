@@ -35,7 +35,7 @@ function fixture(content = searchContent) {
 
 test("permitted retrieval uses only fixed topics, a fixed host, and no credentials", async () => {
   const { fetch, calls } = fixture();
-  const help = createProductHelp({ fetch });
+  const help = createProductHelp({ live: true, fetch });
   const result = await help.lookup(
     { topic: "hotkeys", query: "PRIVATE NOTE", settings: { apiKey: "SECRET" } },
     { signal: controller().signal, allowed: true }
@@ -60,7 +60,7 @@ test("permitted retrieval uses only fixed topics, a fixed host, and no credentia
 
 test("read accepts only topic-scoped curated strict article paths and creates its own command", async () => {
   const { fetch, calls } = fixture([{ type: "text", text: "Article text" }]);
-  const help = createProductHelp({ fetch });
+  const help = createProductHelp({ live: true, fetch });
   for (const page of [
     "/etc/passwd",
     "/help/foo;cat /secret",
@@ -89,6 +89,7 @@ test("read accepts only topic-scoped curated strict article paths and creates it
 test("policy refusal, unavailable network, malformed response, rate limits retain bundled help", async () => {
   let count = 0;
   const help = createProductHelp({
+    live: true,
     fetch: async () => {
       count++;
       throw Error("offline");
@@ -109,7 +110,7 @@ test("policy refusal, unavailable network, malformed response, rate limits retai
     new Response("x", { status: 429 }),
     new Response("x".repeat(140000)),
   ]) {
-    const bad = createProductHelp({ fetch: async () => response });
+    const bad = createProductHelp({ live: true, fetch: async () => response });
     assert.equal(
       (await bad.lookup({ topic: "microphone" }, { signal: controller().signal, allowed: true }))
         .source,
@@ -117,7 +118,7 @@ test("policy refusal, unavailable network, malformed response, rate limits retai
     );
   }
   const f = fixture();
-  const limited = createProductHelp({ fetch: f.fetch });
+  const limited = createProductHelp({ live: true, fetch: f.fetch });
   for (let i = 0; i < 12; i++)
     await limited.lookup({ topic: "hotkeys" }, { signal: controller().signal, allowed: true });
   assert.equal(
@@ -136,7 +137,7 @@ test("untrusted result cannot supply foreign URLs or execute another operation",
     },
     ...searchContent,
   ]);
-  const r = await createProductHelp({ fetch: f.fetch }).lookup(
+  const r = await createProductHelp({ live: true, fetch: f.fetch }).lookup(
     { topic: "hotkeys" },
     { signal: controller().signal, allowed: true }
   );
@@ -152,6 +153,7 @@ test("untrusted result cannot supply foreign URLs or execute another operation",
 test("cancellation aborts transport and does not become an offline answer", async () => {
   const abort = controller();
   const help = createProductHelp({
+    live: true,
     fetch: (_url, { signal }) =>
       new Promise((_, reject) =>
         signal.addEventListener("abort", () => reject(Error("abort")), { once: true })
@@ -191,6 +193,7 @@ test("IPC cancellation is scoped to the requesting window", async () => {
   const ipcMain = { handle: (n, f) => (handlers[n] = f), on: (n, f) => (events[n] = f) };
   const sender = Object.assign(new EventEmitter(), { id: 1 });
   registerProductHelpIpc({
+    live: true,
     ipcMain,
     fetch: async (_url, { signal }) =>
       new Promise((_, reject) =>
@@ -260,6 +263,7 @@ test("cancelling during policy lookup settles without starting a network request
   let fetches = 0;
   const sender = Object.assign(new EventEmitter(), { id: 3 });
   registerProductHelpIpc({
+    live: true,
     ipcMain: { handle: (n, f) => (handlers[n] = f), on: (n, f) => (events[n] = f) },
     fetch: async () => {
       fetches++;
@@ -307,6 +311,8 @@ test("the main-process helper loads using only files included in desktop packagi
     "helpers/appVersion.js",
     "helpers/productHelpFallback.js",
     "config/productHelpTopics.json",
+    "config/forkConfig.js",
+    "config/fork.config.json",
   ])
     fs.copyFileSync(path.join(__dirname, "../../src", file), path.join(root, "src", file));
   assert.equal(
@@ -318,7 +324,7 @@ test("the main-process helper loads using only files included in desktop packagi
 test("complete article reads preserve relevant guidance past old snippet limits", async () => {
   const text = "Introduction\n".repeat(600) + "Hold: release the shortcut to stop recording.";
   const f = fixture([{ type: "text", text }]);
-  const result = await createProductHelp({ fetch: f.fetch }).lookup(
+  const result = await createProductHelp({ live: true, fetch: f.fetch }).lookup(
     { topic: "hotkeys" },
     { signal: controller().signal, allowed: true }
   );
@@ -335,7 +341,7 @@ test("incomplete, error and oversized article content is explicitly bundled", as
     "x".repeat(12001),
   ]) {
     const f = fixture([{ type: "text", text }]);
-    const result = await createProductHelp({ fetch: f.fetch }).lookup(
+    const result = await createProductHelp({ live: true, fetch: f.fetch }).lookup(
       { topic: "hotkeys" },
       { signal: controller().signal, allowed: true }
     );
@@ -445,6 +451,7 @@ test("signed-out IPC, unavailable policy and explicit denial never fetch and hav
   ]) {
     const handlers = {};
     registerProductHelpIpc({
+      live: true,
       ipcMain: { handle: (n, f) => (handlers[n] = f), on: () => {} },
       fetch: async () => {
         throw Error("must not fetch");
@@ -458,4 +465,22 @@ test("signed-out IPC, unavailable policy and explicit denial never fetch and hav
       reason
     );
   }
+});
+
+test("no docs site configured: lookup never fetches and returns bundled help", async () => {
+  let calls = 0;
+  const help = createProductHelp({
+    live: false,
+    fetch: async () => {
+      calls += 1;
+      throw new Error("must not fetch");
+    },
+  });
+  const topic = Object.keys(require("../../src/config/productHelpTopics.json"))[0];
+  const result = await help.lookup(
+    { topic },
+    { signal: new AbortController().signal, allowed: true }
+  );
+  assert.equal(result.source, "bundled");
+  assert.equal(calls, 0);
 });

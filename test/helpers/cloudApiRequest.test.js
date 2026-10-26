@@ -150,3 +150,26 @@ test("preserves policy and upgrade metadata from authenticated cloud failures", 
     minAppVersion: "2.0.0",
   });
 });
+
+test("empty API URL (cloud disabled) issues no network request", async () => {
+  const { createCloudApiRequestHandler } = require("../../src/helpers/cloudApiRequest");
+  let calls = 0;
+  const handler = createCloudApiRequestHandler({
+    getApiUrl: () => "",
+    getAppVersion: () => "0.0.0",
+    proxyFetch: async () => {
+      calls += 1;
+      throw new Error("must not be called");
+    },
+    tokenStore: { getState: () => ({ token: "t", generation: 1 }) },
+    logger: { debug() {}, warn() {}, error() {} },
+  });
+  for (const opts of [
+    { path: "/api/usage", expectedAuthGeneration: 1 },
+    { path: "/api/public", public: true },
+  ]) {
+    const result = await handler(opts);
+    assert.equal(result.success, false);
+  }
+  assert.equal(calls, 0);
+});
