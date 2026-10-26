@@ -1,7 +1,7 @@
 // Fork-owned defaults, applied only where no stored user setting exists.
 // With the hosted cloud disabled, nothing may default to an "openwhispr" route:
 // transcription defaults to the Custom provider pointing at our STT API.
-import { CLOUD_ENABLED, DEFAULT_STT } from "./forkRuntime";
+import { CLOUD_ENABLED, DEFAULT_STT } from "./forkRuntime.ts";
 
 export function resolveForkDefaults(cloudEnabled: boolean, stt = DEFAULT_STT) {
   return {

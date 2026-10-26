@@ -17,7 +17,22 @@ function loadRuntimeEnv(envPath = path.join(__dirname, "..", "dist", "runtime-en
   return {};
 }
 
+// Optional overrides for the non-URL-gating values (tests, packaged builds).
+const OVERRIDE_KEYS = [
+  "SITE_URL",
+  "DOCS_URL",
+  "MCP_URL",
+  "SHARE_VIEWER_URL",
+  "SUPPORT_EMAIL",
+  "ORUKEET_BASE_URL",
+];
+
 function resolveForkConfig(env = {}, runtimeEnv = {}) {
+  const merged = { ...fork };
+  for (const key of OVERRIDE_KEYS) {
+    const value = env[`VITE_${key}`] || runtimeEnv[`VITE_${key}`];
+    if (value) merged[key] = value;
+  }
   const apiUrl = strip(
     env.OPENWHISPR_API_URL ||
       env.VITE_OPENWHISPR_API_URL ||
@@ -27,14 +42,19 @@ function resolveForkConfig(env = {}, runtimeEnv = {}) {
   const authUrl = strip(
     env.AUTH_URL || env.VITE_AUTH_URL || runtimeEnv.VITE_AUTH_URL || fork.AUTH_URL
   );
-  return { ...fork, API_URL: apiUrl, AUTH_URL: authUrl, CLOUD_ENABLED: Boolean(apiUrl && authUrl) };
+  return {
+    ...merged,
+    API_URL: apiUrl,
+    AUTH_URL: authUrl,
+    CLOUD_ENABLED: Boolean(apiUrl && authUrl),
+  };
 }
 
 const current = () => resolveForkConfig(process.env, loadRuntimeEnv());
 
 module.exports = {
   ...current(),
-  fork,
+  fork: current(),
   resolveForkConfig,
   loadRuntimeEnv,
   getApiUrl: () => current().API_URL,

@@ -1,20 +1,25 @@
 // Fork-owned configuration seam (renderer). Mirrors forkConfig.js (main process).
 // Empty API_URL or AUTH_URL means the hosted cloud is disabled.
-import fork from "./fork.config.json";
+import fork from "./fork.config.json" with { type: "json" };
 
-const env = ((import.meta as unknown as { env?: Record<string, string | undefined> }).env ??
-  {}) as Record<string, string | undefined>;
+// Vite inlines import.meta.env in the renderer; outside Vite (node tests, main-process
+// ESM entries) fall back to process.env.
+const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+const env = (viteEnv ?? (typeof process !== "undefined" ? process.env : {})) as Record<
+  string,
+  string | undefined
+>;
 
 const strip = (value: string) => value.replace(/\/+$/, "");
 
 export const API_URL = strip(env.VITE_OPENWHISPR_API_URL || fork.API_URL || "");
 export const AUTH_URL = strip(env.VITE_AUTH_URL || fork.AUTH_URL || "");
 export const ADMIN_URL = strip(env.VITE_ADMIN_URL || fork.ADMIN_URL || "");
-export const SITE_URL = strip(fork.SITE_URL || "");
-export const DOCS_URL = strip(fork.DOCS_URL || "");
-export const SUPPORT_EMAIL = fork.SUPPORT_EMAIL || "";
-export const SHARE_VIEWER_URL = strip(fork.SHARE_VIEWER_URL || "");
-export const MCP_URL = fork.MCP_URL || "";
+export const SITE_URL = strip(env.VITE_SITE_URL || fork.SITE_URL || "");
+export const DOCS_URL = strip(env.VITE_DOCS_URL || fork.DOCS_URL || "");
+export const SUPPORT_EMAIL = env.VITE_SUPPORT_EMAIL || fork.SUPPORT_EMAIL || "";
+export const SHARE_VIEWER_URL = strip(env.VITE_SHARE_VIEWER_URL || fork.SHARE_VIEWER_URL || "");
+export const MCP_URL = env.VITE_MCP_URL || fork.MCP_URL || "";
 export const BRAND_NAME = fork.BRAND_NAME;
 export const DEFAULT_STT = fork.DEFAULT_STT;
 export const CLOUD_ENABLED = Boolean(API_URL && AUTH_URL);

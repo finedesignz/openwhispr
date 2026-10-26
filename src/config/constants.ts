@@ -1,4 +1,4 @@
-import { API_URL as FORK_API_URL } from "./forkRuntime";
+import { API_URL as FORK_API_URL } from "./forkRuntime.ts";
 // Split query/hash so path-suffix stripping and later joins operate on the
 // path only. Provider docs and Azure/gateway pastes often include ?api-version=
 // (or similar) on a full /chat/completions URL (#1309).

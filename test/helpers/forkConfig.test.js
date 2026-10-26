@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { resolveForkConfig, fork } = require("../../src/config/forkConfig");
+const { resolveForkConfig } = require("../../src/config/forkConfig");
+const fork = require("../../src/config/fork.config.json");
 
 test("cloud disabled by default: no hosted URL in shipped config", () => {
   const cfg = resolveForkConfig({}, {});
