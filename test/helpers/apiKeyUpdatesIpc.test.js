@@ -207,11 +207,11 @@ const invoke = (channel, ...args) => handlers.get(channel)({ sender: editor }, .
 
 // Managed starts mint from the account, which needs an API URL.
 function withManagedApi(t) {
-  const previous = process.env.OPENWHISPR_API_URL;
-  process.env.OPENWHISPR_API_URL = "https://api.openwhispr.test";
+  const previous = process.env.VITE_OPENWHISPR_API_URL;
+  process.env.VITE_OPENWHISPR_API_URL = "https://api.openwhispr.test";
   t.after(() => {
-    if (previous === undefined) delete process.env.OPENWHISPR_API_URL;
-    else process.env.OPENWHISPR_API_URL = previous;
+    if (previous === undefined) delete process.env.VITE_OPENWHISPR_API_URL;
+    else process.env.VITE_OPENWHISPR_API_URL = previous;
   });
 }
 

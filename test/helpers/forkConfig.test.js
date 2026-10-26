@@ -12,12 +12,12 @@ test("cloud disabled by default: no hosted URL in shipped config", () => {
 
 test("cloud needs both API and auth URLs", () => {
   assert.equal(
-    resolveForkConfig({ OPENWHISPR_API_URL: "https://a.example" }, {}).CLOUD_ENABLED,
+    resolveForkConfig({ VITE_OPENWHISPR_API_URL: "https://a.example" }, {}).CLOUD_ENABLED,
     false
   );
   assert.equal(resolveForkConfig({ VITE_AUTH_URL: "https://b.example" }, {}).CLOUD_ENABLED, false);
   const cfg = resolveForkConfig(
-    { OPENWHISPR_API_URL: "https://a.example/", AUTH_URL: "https://b.example" },
+    { VITE_OPENWHISPR_API_URL: "https://a.example/", VITE_AUTH_URL: "https://b.example" },
     {}
   );
   assert.equal(cfg.CLOUD_ENABLED, true);

@@ -1,10 +1,12 @@
 // Fork-owned configuration seam (main process). Values come from fork.config.json;
-// the API/auth URLs may be overridden by env or the packaged runtime-env.json.
+// overrides use the same VITE_* keys (forkKeys.js) the renderer sees at build time, via env or
+// the packaged runtime-env.json snapshot, so main and renderer agree on CLOUD_ENABLED.
 // Empty API_URL or AUTH_URL means the hosted cloud is disabled: no request is
 // ever issued to a hosted backend and cloud-only UI is hidden.
 const fs = require("fs");
 const path = require("path");
 const fork = require("./fork.config.json");
+const { OVERRIDE_KEYS } = require("./forkKeys");
 
 const strip = (value) => (value || "").replace(/\/+$/, "");
 
@@ -17,16 +19,6 @@ function loadRuntimeEnv(envPath = path.join(__dirname, "..", "dist", "runtime-en
   return {};
 }
 
-// Optional overrides for the non-URL-gating values (tests, packaged builds).
-const OVERRIDE_KEYS = [
-  "SITE_URL",
-  "DOCS_URL",
-  "MCP_URL",
-  "SHARE_VIEWER_URL",
-  "SUPPORT_EMAIL",
-  "ORUKEET_BASE_URL",
-];
-
 function resolveForkConfig(env = {}, runtimeEnv = {}) {
   const merged = { ...fork };
   for (const key of OVERRIDE_KEYS) {
@@ -34,14 +26,9 @@ function resolveForkConfig(env = {}, runtimeEnv = {}) {
     if (value) merged[key] = value;
   }
   const apiUrl = strip(
-    env.OPENWHISPR_API_URL ||
-      env.VITE_OPENWHISPR_API_URL ||
-      runtimeEnv.VITE_OPENWHISPR_API_URL ||
-      fork.API_URL
+    env.VITE_OPENWHISPR_API_URL || runtimeEnv.VITE_OPENWHISPR_API_URL || fork.API_URL
   );
-  const authUrl = strip(
-    env.AUTH_URL || env.VITE_AUTH_URL || runtimeEnv.VITE_AUTH_URL || fork.AUTH_URL
-  );
+  const authUrl = strip(env.VITE_AUTH_URL || runtimeEnv.VITE_AUTH_URL || fork.AUTH_URL);
   return {
     ...merged,
     API_URL: apiUrl,
