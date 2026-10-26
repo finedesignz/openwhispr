@@ -237,3 +237,11 @@ test("a Linux AppImage is supported, but deb/rpm/tar.gz installs never touch the
 
   packaged.cleanup();
 });
+
+test("setupAutoUpdater leaves the feed to the build-generated app-update.yml", () => {
+  const autoUpdater = makeAutoUpdater();
+  const feeds = [];
+  autoUpdater.setFeedURL = (feed) => feeds.push(feed);
+  createUpdateManager(autoUpdater);
+  assert.deepEqual(feeds, []);
+});
