@@ -312,6 +312,7 @@ test("the main-process helper loads using only files included in desktop packagi
     "helpers/productHelpFallback.js",
     "config/productHelpTopics.json",
     "config/forkConfig.js",
+    "config/forkKeys.js",
     "config/fork.config.json",
   ])
     fs.copyFileSync(path.join(__dirname, "../../src", file), path.join(root, "src", file));
