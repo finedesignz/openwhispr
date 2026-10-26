@@ -532,3 +532,19 @@ test("a session written before the resume flags infers its hotkey confirmations"
   assert.equal(past.resume.dictationDemoCompleted, false);
   assert.equal(past.resume.assistantDemoCompleted, false);
 });
+
+test("cloud disabled forces the guest auth path; cloud enabled leaves it alone", async () => {
+  const { resolveAuthPathForCloud } = await load();
+  assert.equal(resolveAuthPathForCloud(false, null), "guest");
+  assert.equal(resolveAuthPathForCloud(false, "account"), "account");
+  assert.equal(resolveAuthPathForCloud(true, null), null);
+});
+
+test("cloud-only settings sections fall back to general when cloud is disabled", async () => {
+  const { gateSettingsSection } = await import("../../src/config/cloudSections.ts");
+  for (const s of ["account", "plansBilling", "workspace"]) {
+    assert.equal(gateSettingsSection(s, false), "general");
+    assert.equal(gateSettingsSection(s, true), s);
+  }
+  assert.equal(gateSettingsSection("system", false), "system");
+});

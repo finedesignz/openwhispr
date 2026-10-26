@@ -1,3 +1,4 @@
+import { SITE_URL } from "../../config/forkRuntime";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, Mail } from "../icons";
@@ -27,7 +28,7 @@ import { openExternalLink } from "../../utils/externalLinks";
 import type { Workspace } from "../../types/electron";
 
 const SEAT_LIMIT = 500;
-const CONTACT_SALES_URL = "https://openwhispr.com/contact-sales";
+const CONTACT_SALES_URL = `${SITE_URL}/contact-sales`;
 
 // The API's coded billing refusals, localized; uncoded errors fall back to
 // the server's own message.

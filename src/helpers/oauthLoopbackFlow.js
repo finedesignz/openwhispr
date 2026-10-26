@@ -3,7 +3,10 @@ const crypto = require("crypto");
 const { openExternalUrl } = require("./externalUrlOpener");
 
 const OAUTH_TIMEOUT_MS = 120000;
-const DEFAULT_DESKTOP_CALLBACK_URL = "https://openwhispr.com/auth/desktop-callback";
+const forkConfig = require("../config/forkConfig");
+const DEFAULT_DESKTOP_CALLBACK_URL = forkConfig.SITE_URL
+  ? `${forkConfig.SITE_URL}/auth/desktop-callback`
+  : "";
 
 const PROTOCOL_BY_CHANNEL = {
   development: "openwhispr-dev",

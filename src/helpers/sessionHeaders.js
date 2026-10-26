@@ -1,6 +1,7 @@
+const forkConfig = require("../config/forkConfig");
+
 const OPENWHISPR_HOST_PATTERNS = [
-  "https://auth.openwhispr.com/*",
-  "https://api.openwhispr.com/*",
+  ...[forkConfig.AUTH_URL, forkConfig.API_URL].filter(Boolean).map((url) => `${url}/*`),
   "http://localhost:3000/*",
   "http://127.0.0.1:3000/*",
 ];

@@ -17,6 +17,7 @@ import { normalizeEmailDraftTarget, type EmailDraftTargetSetting } from "../util
 import { normalizeToneStyles, type ToneStyles } from "../config/toneStyle";
 import { PROMPT_KIND_LIST, type PromptKind } from "../config/prompts/registry";
 import { sweepRetiredPromptOverrides } from "../config/retiredPrompts";
+import { FORK_DEFAULTS } from "../config/forkDefaults";
 import {
   sweepRetiredCloudModelSelections,
   type RetiredModelProvider,
@@ -1544,19 +1545,26 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   ),
   cloudTranscriptionProvider: readString(
     "cloudTranscriptionProvider",
-    DEFAULT_CLOUD_TRANSCRIPTION_PROVIDER
+    FORK_DEFAULTS.transcriptionProvider ?? DEFAULT_CLOUD_TRANSCRIPTION_PROVIDER
   ),
-  cloudTranscriptionModel: readString("cloudTranscriptionModel", "gpt-4o-mini-transcribe"),
+  cloudTranscriptionModel: readString(
+    "cloudTranscriptionModel",
+    FORK_DEFAULTS.transcriptionModel ?? "gpt-4o-mini-transcribe"
+  ),
   cloudTranscriptionBaseUrl: readString(
     "cloudTranscriptionBaseUrl",
-    API_ENDPOINTS.TRANSCRIPTION_BASE
+    FORK_DEFAULTS.transcriptionBaseUrl ?? API_ENDPOINTS.TRANSCRIPTION_BASE
   ),
   transcriptionModelByProvider: readModelMemory("transcriptionModelByProvider"),
   reasoningModelByProvider: readModelMemory("reasoningModelByProvider"),
   // Secrets aren't hydrated yet at construction; the BYOK default is set
   // post-hydration in initializeSettings.
-  cloudTranscriptionMode: readString("cloudTranscriptionMode", "openwhispr"),
-  cleanupCloudMode: readString("cleanupCloudMode", "openwhispr"),
+  cloudTranscriptionMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("cloudTranscriptionMode", FORK_DEFAULTS.cloudMode)
+  ),
+  cleanupCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("cleanupCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   cleanupCloudBaseUrl: readString("cleanupCloudBaseUrl", API_ENDPOINTS.OPENAI_BASE),
   cortiEnvironment: readString("cortiEnvironment", "us"),
   cortiTenant: readString("cortiTenant", "base"),
@@ -1736,9 +1744,11 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   isSignedIn: readBoolean("isSignedIn", false),
 
   transcriptionMode: (() => {
-    const v = readString("transcriptionMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("transcriptionMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (v === "openwhispr" || v === "providers" || v === "local" || v === "self-hosted") return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   remoteTranscriptionType: (() => {
     const v = readString("remoteTranscriptionType", "lan");
@@ -1747,7 +1757,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   remoteTranscriptionUrl: readString("remoteTranscriptionUrl", ""),
   remoteTranscriptionModel: readString("remoteTranscriptionModel", ""),
   cleanupMode: (() => {
-    const v = readString("cleanupMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("cleanupMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1756,15 +1768,17 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   cleanupRemoteUrl: readString("cleanupRemoteUrl", ""),
   keepLocalModelLoaded: readBoolean("keepLocalModelLoaded", false),
 
   meetingTranscriptionMode: (() => {
-    const v = readString("meetingTranscriptionMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("meetingTranscriptionMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (v === "openwhispr" || v === "providers" || v === "local" || v === "self-hosted") return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   meetingUseLocalWhisper: readBoolean("meetingUseLocalWhisper", false),
   meetingWhisperModel: readString("meetingWhisperModel", ""),
@@ -1782,9 +1796,11 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   meetingRemoteTranscriptionUrl: readString("meetingRemoteTranscriptionUrl", ""),
 
   uploadTranscriptionMode: (() => {
-    const v = readString("uploadTranscriptionMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("uploadTranscriptionMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (v === "openwhispr" || v === "providers" || v === "local" || v === "self-hosted") return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   uploadUseLocalWhisper: readBoolean("uploadUseLocalWhisper", false),
   uploadWhisperModel: readString("uploadWhisperModel", ""),
@@ -1799,7 +1815,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   uploadRemoteTranscriptionModel: readString("uploadRemoteTranscriptionModel", ""),
 
   noteFormattingMode: (() => {
-    const v = readString("noteFormattingMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("noteFormattingMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1808,7 +1826,7 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   noteFormattingProvider: readString("noteFormattingProvider", ""),
   noteFormattingModel: readString("noteFormattingModel", ""),
@@ -1818,7 +1836,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   noteFormattingCustomApiKey: readString("noteFormattingCustomApiKey", ""),
 
   translationMode: (() => {
-    const v = readString("translationMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("translationMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1827,11 +1847,13 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   translationProvider: readString("translationProvider", ""),
   translationModel: readString("translationModel", ""),
-  translationCloudMode: readString("translationCloudMode", "openwhispr"),
+  translationCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("translationCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   translationCloudBaseUrl: readString("translationCloudBaseUrl", ""),
   translationRemoteUrl: readString("translationRemoteUrl", ""),
   translationCustomApiKey: readString("translationCustomApiKey", ""),
@@ -1933,9 +1955,13 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
 
   chatAgentModel: readString("chatAgentModel", "openai/gpt-oss-120b"),
   chatAgentProvider: readString("chatAgentProvider", "groq"),
-  chatAgentCloudMode: readString("chatAgentCloudMode", "openwhispr"),
+  chatAgentCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("chatAgentCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   chatAgentMode: (() => {
-    const v = readString("chatAgentMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("chatAgentMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1944,14 +1970,16 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   chatAgentRemoteUrl: readString("chatAgentRemoteUrl", ""),
   chatAgentCloudBaseUrl: readString("chatAgentCloudBaseUrl", ""),
   chatAgentCustomApiKey: readString("chatAgentCustomApiKey", ""),
 
   dictationAgentMode: (() => {
-    const v = readString("dictationAgentMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("dictationAgentMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1960,11 +1988,13 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   dictationAgentProvider: readString("dictationAgentProvider", ""),
   dictationAgentModel: readString("dictationAgentModel", ""),
-  dictationAgentCloudMode: readString("dictationAgentCloudMode", "openwhispr"),
+  dictationAgentCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("dictationAgentCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   dictationAgentCloudBaseUrl: readString("dictationAgentCloudBaseUrl", ""),
   dictationAgentRemoteUrl: readString("dictationAgentRemoteUrl", ""),
   dictationAgentCustomApiKey: readString("dictationAgentCustomApiKey", ""),
@@ -1978,7 +2008,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   dictationAgentVisionMode: "providers" as InferenceMode,
   dictationAgentVisionProvider: readString("dictationAgentVisionProvider", ""),
   dictationAgentVisionModel: readString("dictationAgentVisionModel", ""),
-  dictationAgentVisionCloudMode: readString("dictationAgentVisionCloudMode", "openwhispr"),
+  dictationAgentVisionCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("dictationAgentVisionCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   dictationAgentVisionCloudBaseUrl: readString("dictationAgentVisionCloudBaseUrl", ""),
   dictationAgentVisionCustomApiKey: readString("dictationAgentVisionCustomApiKey", ""),
 

@@ -1,3 +1,4 @@
+import { DOCS_URL, MCP_URL as FORK_MCP_URL } from "../../config/forkRuntime";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
@@ -9,8 +10,8 @@ import claudeIcon from "../../assets/icons/providers/claude.svg";
 import openaiIcon from "../../assets/icons/providers/openai.svg";
 import cursorIcon from "../../assets/icons/providers/cursor.svg";
 
-const MCP_URL = "https://mcp.openwhispr.com/mcp";
-const MCP_DOCS_URL = "https://docs.openwhispr.com/integrations/mcp";
+const MCP_URL = FORK_MCP_URL;
+const MCP_DOCS_URL = `${DOCS_URL}/integrations/mcp`;
 
 const MCP_CLIENTS = [
   { name: "Claude", icon: claudeIcon },

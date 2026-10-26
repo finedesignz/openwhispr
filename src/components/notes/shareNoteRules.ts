@@ -1,6 +1,7 @@
+import { SHARE_VIEWER_URL } from "../../config/forkRuntime";
 import type { NoteAccessGrant, NoteAccessState, ShareSettings } from "../../types/electron";
 
-const SHARE_VIEWER_BASE_URL = "https://notes.openwhispr.com";
+const SHARE_VIEWER_BASE_URL = SHARE_VIEWER_URL;
 
 type ShareLinkSettings = Pick<ShareSettings, "visibility" | "token_prefix">;
 

@@ -29,6 +29,7 @@ import { getProviderIcon, isMonochromeProvider } from "@/utils/providerIcons";
 import { cn } from "../lib/utils";
 // Only the Local card opens the warning dialog now — BYOK goes
 // straight through from the "Choose your API setup" modal.
+import { CLOUD_ENABLED } from "../../config/forkRuntime";
 import warningBackdrop from "../../assets/onboarding-setup-warning-hero.webp";
 import apiSetupHero from "../../assets/onboarding-api-setup-hero.webp";
 
@@ -148,11 +149,12 @@ export default function SetupChoiceStep({
     llmProviders: modelRegistry.getCloudProviders(),
   });
   const {
-    cloud: cloudAllowed,
+    cloud: cloudPolicyAllowed,
     local: localAllowed,
     byok: byokAllowed,
     selfHosted: selfHostedAllowed,
   } = availability;
+  const cloudAllowed = cloudPolicyAllowed && CLOUD_ENABLED;
   const moreOptionsAllowed = byokAllowed || selfHostedAllowed;
 
   const chooseCloud = () => {

@@ -1,18 +1,24 @@
 import type { ComponentType } from "react";
+import { CLOUD_ENABLED } from "../../config/forkRuntime";
 import { Calendar, Key, Link2, Network, Terminal } from "../icons";
 
 export type IntegrationsSection = "connectors" | "calendars" | "api" | "mcp" | "cli";
 
 export const DEFAULT_INTEGRATIONS_SECTION: IntegrationsSection = "calendars";
 
-export const INTEGRATIONS_SECTION_GROUPS: ReadonlyArray<{
+const ALL_INTEGRATIONS_SECTION_GROUPS: ReadonlyArray<{
   id: "assistant" | "meetings" | "developer";
   sections: readonly IntegrationsSection[];
 }> = [
   { id: "meetings", sections: ["calendars"] },
   { id: "assistant", sections: ["connectors"] },
-  { id: "developer", sections: ["api", "mcp", "cli"] },
+  // Hosted API keys, MCP and CLI pairing need the cloud backend.
+  { id: "developer", sections: CLOUD_ENABLED ? ["api", "mcp", "cli"] : [] },
 ];
+
+export const INTEGRATIONS_SECTION_GROUPS = ALL_INTEGRATIONS_SECTION_GROUPS.filter(
+  (group) => group.sections.length > 0
+);
 
 export const INTEGRATIONS_SECTION_ICONS: Record<
   IntegrationsSection,
