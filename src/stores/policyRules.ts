@@ -15,6 +15,18 @@ export interface PolicyDecisionSnapshot {
   appVersion: string | null;
 }
 
+/**
+ * With no hosted backend configured there is no org to enforce a policy, so the
+ * policy is unmanaged. Without this, a persisted account scope from an earlier
+ * cloud session makes the policy fetch fail (no API URL) and the fail-closed
+ * "error" status blocks meeting/dictation/upload transcription.
+ */
+export function cloudDisabledPolicyState(
+  cloudEnabled: boolean
+): Pick<PolicyDecisionSnapshot, "status" | "policy"> | null {
+  return cloudEnabled ? null : { status: "unmanaged", policy: null };
+}
+
 function managedPolicy(state: PolicyDecisionSnapshot): OrgPolicy | null {
   return state.status === "managed" && state.policy ? state.policy : null;
 }

@@ -1,3 +1,4 @@
+import { DOCS_URL } from "../config/forkRuntime";
 import { useEffect, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus } from "./icons";
@@ -8,6 +9,7 @@ import { ensureConnectorStatus, useConnectorStatusStore } from "../stores/connec
 import { useConnectorAccess } from "../hooks/useConnectorAccess";
 import ApiKeysSection from "./ApiKeysSection";
 import { ConnectorsSection } from "./ConnectorsSection";
+import { BetaBadge } from "./connectors/BetaBadge";
 import { CONNECTOR_ROWS } from "./connectors/connectorRows";
 import { IntegrationsNav } from "./integrations/IntegrationsNav";
 import { IntegrationsPane, UpsellBar } from "./integrations/IntegrationsPane";
@@ -22,7 +24,7 @@ import {
   type SectionMeta,
 } from "./integrations/integrationsSections";
 
-const API_DOCS_URL = "https://docs.openwhispr.com/api/overview";
+const API_DOCS_URL = `${DOCS_URL}/api/overview`;
 const { mcp: McpIcon, cli: CliIcon } = INTEGRATIONS_SECTION_ICONS;
 
 interface IntegrationsViewProps {
@@ -104,6 +106,7 @@ export default function IntegrationsView({
     connectors: (
       <IntegrationsPane
         title={titleOf("connectors")}
+        titleBadge={<BetaBadge />}
         description={t("integrations.connectors.description")}
       >
         <ConnectorsSection onUpgrade={onUpgrade} />

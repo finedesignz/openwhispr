@@ -1,3 +1,4 @@
+import { DOCS_URL } from "../../config/forkRuntime";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "../ui/badge";
@@ -6,7 +7,7 @@ import { CopyableCommand } from "../ui/CopyableCommand";
 import { SectionLabel, SettingsPanel, SettingsPanelRow } from "../ui/SettingsSection";
 import { IntegrationsPane } from "./IntegrationsPane";
 
-const CLI_DOCS_URL = "https://docs.openwhispr.com/cli/install";
+const CLI_DOCS_URL = `${DOCS_URL}/cli/install`;
 const INSTALL_CMD = "npm install -g @openwhispr/cli";
 const LOCAL_EXAMPLE = "openwhispr --local notes list";
 const CLOUD_LOGIN_CMD = "openwhispr auth login";

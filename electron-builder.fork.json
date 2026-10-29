@@ -1,0 +1,18 @@
+{
+  "extends": "./electron-builder.json",
+  "win": {
+    "azureSignOptions": {
+      "endpoint": "https://eus.codesigning.azure.net/",
+      "certificateProfileName": "TitaniumLabsLLC",
+      "codeSigningAccountName": "titaniumlabs-signing",
+      "publisherName": "CN=Titanium Labs LLC"
+    }
+  },
+  "publish": {
+    "provider": "github",
+    "owner": "finedesignz",
+    "repo": "openwhispr",
+    "private": false,
+    "releaseType": "draft"
+  }
+}

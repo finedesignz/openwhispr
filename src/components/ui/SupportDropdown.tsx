@@ -1,3 +1,4 @@
+import { COMMUNITY_URL, DOCS_URL, SUPPORT_EMAIL } from "../../config/forkRuntime";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./button";
@@ -54,27 +55,33 @@ export default function SupportDropdown({ className, trigger }: SupportDropdownP
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => openExternal("https://docs.openwhispr.com")}>
-          <BookOpen className="me-2 h-4 w-4" />
-          {t("support.documentation")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => openExternal("https://discord.gg/yZWC9WTtX7")}>
-          <DiscordIcon className="me-2 h-4 w-4" />
-          {t("support.joinDiscord")}
-        </DropdownMenuItem>
+        {DOCS_URL && (
+          <DropdownMenuItem onClick={() => openExternal(DOCS_URL)}>
+            <BookOpen className="me-2 h-4 w-4" />
+            {t("support.documentation")}
+          </DropdownMenuItem>
+        )}
+        {COMMUNITY_URL && (
+          <DropdownMenuItem onClick={() => openExternal(COMMUNITY_URL)}>
+            <DiscordIcon className="me-2 h-4 w-4" />
+            {t("support.joinDiscord")}
+          </DropdownMenuItem>
+        )}
+        {SUPPORT_EMAIL && (
+          <DropdownMenuItem
+            onClick={async () => {
+              const result = await window.electronAPI?.openExternal(`mailto:${SUPPORT_EMAIL}`);
+              if (!result?.success) {
+                openExternal(`https://mail.google.com/mail/?view=cm&to=${SUPPORT_EMAIL}`);
+              }
+            }}
+          >
+            <Mail className="me-2 h-4 w-4" />
+            {t("support.contactSupport")}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
-          onClick={async () => {
-            const result = await window.electronAPI?.openExternal("mailto:support@openwhispr.com");
-            if (!result?.success) {
-              openExternal("https://mail.google.com/mail/?view=cm&to=support@openwhispr.com");
-            }
-          }}
-        >
-          <Mail className="me-2 h-4 w-4" />
-          {t("support.contactSupport")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => openExternal("https://github.com/OpenWhispr/openwhispr/issues")}
+          onClick={() => openExternal("https://github.com/finedesignz/openwhispr/issues")}
         >
           <Bug className="me-2 h-4 w-4" />
           {t("support.submitBug")}

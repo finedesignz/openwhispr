@@ -2,6 +2,11 @@ import { createAuthClient } from "better-auth/react";
 import { ssoClient } from "@better-auth/sso/client";
 import { openExternalLink } from "../utils/externalLinks";
 import {
+  AUTH_URL as FORK_AUTH_URL,
+  ADMIN_URL as FORK_ADMIN_URL,
+  SITE_URL as FORK_SITE_URL,
+} from "../config/forkRuntime";
+import {
   authContextFetch,
   handleAuthRequestError,
   handleAuthRequestResponse,
@@ -10,20 +15,26 @@ import {
   prepareAuthRequest,
 } from "./authRequestContext";
 
-export const AUTH_URL = import.meta.env.VITE_AUTH_URL || "https://auth.openwhispr.com";
-export const authClient = createAuthClient({
-  baseURL: AUTH_URL,
-  plugins: [ssoClient()],
-  fetchOptions: {
-    credentials: "omit",
-    customFetchImpl: authContextFetch,
-    headers: { "x-openwhispr-source": "desktop" },
-    onRequest: prepareAuthRequest,
-    onResponse: handleAuthRequestResponse,
-    onSuccess: handleAuthRequestSuccess,
-    onError: handleAuthRequestError,
-  },
-});
+export const AUTH_URL = FORK_AUTH_URL;
+const buildAuthClient = () =>
+  createAuthClient({
+    baseURL: AUTH_URL,
+    plugins: [ssoClient()],
+    fetchOptions: {
+      credentials: "omit",
+      customFetchImpl: authContextFetch,
+      headers: { "x-openwhispr-source": "desktop" },
+      onRequest: prepareAuthRequest,
+      onResponse: handleAuthRequestResponse,
+      onSuccess: handleAuthRequestSuccess,
+      onError: handleAuthRequestError,
+    },
+  });
+// No auth server configured (cloud disabled): no client exists, so no request can
+// ever be issued. Callers already branch on a missing client (useAuth, sign-in UI).
+export const authClient = (AUTH_URL ? buildAuthClient() : null) as unknown as ReturnType<
+  typeof buildAuthClient
+>;
 
 let authRefetchTimer: ReturnType<typeof setTimeout> | null = null;
 window.electronAPI?.onAuthTokenStateChanged?.((state) => {
@@ -34,7 +45,7 @@ window.electronAPI?.onAuthTokenStateChanged?.((state) => {
   if (authRefetchTimer) clearTimeout(authRefetchTimer);
   authRefetchTimer = setTimeout(() => {
     authRefetchTimer = null;
-    authClient.$store.notify("$sessionSignal");
+    authClient?.$store.notify("$sessionSignal");
   }, 0);
 });
 
@@ -176,7 +187,7 @@ export async function withSessionRefresh<T>(operation: () => Promise<T>): Promis
   }
 }
 
-const DESKTOP_OAUTH_CALLBACK_URL = "https://openwhispr.com/auth/desktop-callback";
+const DESKTOP_OAUTH_CALLBACK_URL = `${FORK_SITE_URL}/auth/desktop-callback`;
 
 export async function signInWithSocial(provider: SocialProvider): Promise<{ error?: Error }> {
   try {
@@ -230,7 +241,7 @@ export async function requestPasswordReset(email: string): Promise<{ error?: Err
   try {
     const { error } = await authClient.requestPasswordReset({
       email: email.trim(),
-      redirectTo: "https://openwhispr.com/reset-password",
+      redirectTo: `${FORK_SITE_URL}/reset-password`,
     });
     if (error) {
       return { error: toAuthActionError(error, "Failed to send reset email") };
@@ -284,7 +295,7 @@ export async function changePassword(params: {
   }
 }
 
-export const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || "https://admin.openwhispr.com";
+export const ADMIN_URL = FORK_ADMIN_URL;
 
 /**
  * Open the enterprise admin console signed in: the desktop session lives in

@@ -14,9 +14,14 @@ import type {
 } from "../types/electron";
 import type { CalendarAccount, MicrosoftCalendarAccount } from "../types/calendar";
 import { normalizeEmailDraftTarget, type EmailDraftTargetSetting } from "../utils/emailDraftTarget";
+import { normalizeToneStyles, type ToneStyles } from "../config/toneStyle";
 import { PROMPT_KIND_LIST, type PromptKind } from "../config/prompts/registry";
 import { sweepRetiredPromptOverrides } from "../config/retiredPrompts";
-import { sweepRetiredCloudModelSelections } from "../config/retiredCloudModels";
+import { FORK_DEFAULTS } from "../config/forkDefaults";
+import {
+  sweepRetiredCloudModelSelections,
+  type RetiredModelProvider,
+} from "../config/retiredCloudModels";
 import {
   deriveReasoningMode,
   buildReasoningScopePatches,
@@ -28,15 +33,17 @@ import {
   type InferenceScope,
   type InferenceScopeDefinition,
   type InferenceScopeStoreKeys,
+  usesCloudModelCatalog,
 } from "../config/inferenceScopes";
 import { normalizeChineseScriptPreference } from "../utils/chineseScript";
 import { adjustBedrockModelForRegion } from "../utils/bedrockRegions";
 import modelRegistryData from "../models/modelRegistryData.json";
 import { pickDefaultModelId } from "../models/providerDefaultModel";
 // Both are leaves: tinfoilModelCache imports only a type from ModelRegistry and
-// the switch store only zustand, so neither reopens the ModelRegistry cycle.
+// the switch store only zustand and a type, so neither reopens the ModelRegistry
+// cycle.
 import { readCachedTinfoilModels } from "../models/tinfoilModelCache";
-import { recordTinfoilModelSwitch } from "./tinfoilModelSwitchStore";
+import { recordRetiredModelSwitch } from "./retiredModelSwitchStore";
 import { MEETING_STREAMING_PROVIDER_IDS } from "../helpers/meetingTranscriptionRouting";
 import { STREAMING_ONLY_PROVIDERS } from "../helpers/transcriptionRoute";
 import {
@@ -149,7 +156,7 @@ function canonicalTranscriptionBaseUrl(providerId: string): string | null {
   );
 }
 
-function reasoningModelBelongsToProvider(providerId: string, modelId: string): boolean {
+export function reasoningModelBelongsToProvider(providerId: string, modelId: string): boolean {
   if (!modelId) return false;
   // Custom and OpenRouter ids are free-form; any remembered id is valid.
   // Tinfoil's registry entry is refreshed in place from its live catalog.
@@ -274,6 +281,7 @@ const BOOLEAN_SETTINGS = new Set([
   "assemblyAiStreaming",
   "autoGenerateNoteTitle",
   "useCleanupModel",
+  "toneStyleEnabled",
   "useDictationAgent",
   "keepLocalModelLoaded",
   "voiceAgentScreenContext",
@@ -833,14 +841,15 @@ if (Object.keys(healedMeetingFollowModes).length > 0) {
   );
 }
 
-// Resolved offline, so a retired model's name survives only in the user's own
-// catalog cache and a replacement's only if we seed it. The raw-id fallback is
-// what the live-catalog reconcile shows too.
-function tinfoilModelName(modelId: string): string {
+// Resolved offline, so a retired model's name survives only in Tinfoil's
+// catalog cache, and a replacement's only if the registry lists it. The raw-id
+// fallback is what the live-catalog reconcile shows too.
+function sweptModelName(providerId: RetiredModelProvider, modelId: string): string {
+  const cached = providerId === "tinfoil" ? readCachedTinfoilModels().models : [];
   const named =
-    readCachedTinfoilModels().models.find((model) => model.id === modelId) ??
+    cached.find((model) => model.id === modelId) ??
     modelRegistryData.cloudProviders
-      .find((provider) => provider.id === "tinfoil")
+      .find((provider) => provider.id === providerId)
       ?.models.find((model) => model.id === modelId);
   return named?.name ?? modelId;
 }
@@ -853,23 +862,35 @@ function migrateRetiredCloudModels() {
   if (!isBrowser) return;
   const swept = sweepRetiredCloudModelSelections(
     localStorage,
-    Object.values(INFERENCE_SCOPES).map(({ storeKeys }) => storeKeys)
+    Object.values(INFERENCE_SCOPES)
+      .map(({ storeKeys }) => storeKeys)
+      .filter(({ mode }) => {
+        const storedMode = localStorage.getItem(mode);
+        // An unset mode loads as the default, openwhispr.
+        return !storedMode || usesCloudModelCatalog(storedMode);
+      })
   );
   if (swept.length === 0) return;
 
   logger.info(
     "Repointed retired cloud model selections",
-    { scopes: swept.map(({ storeKey }) => storeKey) },
+    { swept: swept.map(({ storeKey, from, to }) => ({ storeKey, from, to })) },
     "settings"
   );
 
-  // Tinfoil is the one provider that tells the user their model was switched
-  // out, and getting here first means reconcileSelectedModels no longer will.
+  // Tell the user their model was switched out; for Tinfoil, getting here
+  // first means reconcileSelectedModels no longer will. Several scopes can
+  // share a retired model, so say so once per model.
   const announced = new Set<string>();
   for (const { provider, from, to } of swept) {
-    if (provider !== "tinfoil" || announced.has(from)) continue;
-    announced.add(from);
-    recordTinfoilModelSwitch({ from: tinfoilModelName(from), to: tinfoilModelName(to) });
+    const key = `${provider}:${from}`;
+    if (announced.has(key)) continue;
+    announced.add(key);
+    recordRetiredModelSwitch({
+      provider,
+      from: sweptModelName(provider, from),
+      to: sweptModelName(provider, to),
+    });
   }
 }
 
@@ -996,6 +1017,8 @@ export interface SettingsState
   // dedicated model used only when a screenshot is attached.
   voiceAgentScreenContext: boolean;
   emailDraftTarget: EmailDraftTargetSetting;
+  toneStyleEnabled: boolean;
+  toneStyles: ToneStyles;
   useDictationAgentVisionModel: boolean;
   dictationAgentVisionMode: InferenceMode;
   dictationAgentVisionProvider: string;
@@ -1027,6 +1050,8 @@ export interface SettingsState
   setDictationAgentCustomApiKey: (key: string) => void;
 
   setVoiceAgentScreenContext: (value: boolean) => void;
+  setToneStyleEnabled: (value: boolean) => void;
+  setToneStyles: (styles: ToneStyles) => void;
   setEmailDraftTarget: (value: EmailDraftTargetSetting) => void;
   setUseDictationAgentVisionModel: (value: boolean) => void;
   setDictationAgentVisionProvider: (value: string) => void;
@@ -1520,19 +1545,26 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   ),
   cloudTranscriptionProvider: readString(
     "cloudTranscriptionProvider",
-    DEFAULT_CLOUD_TRANSCRIPTION_PROVIDER
+    FORK_DEFAULTS.transcriptionProvider ?? DEFAULT_CLOUD_TRANSCRIPTION_PROVIDER
   ),
-  cloudTranscriptionModel: readString("cloudTranscriptionModel", "gpt-4o-mini-transcribe"),
+  cloudTranscriptionModel: readString(
+    "cloudTranscriptionModel",
+    FORK_DEFAULTS.transcriptionModel ?? "gpt-4o-mini-transcribe"
+  ),
   cloudTranscriptionBaseUrl: readString(
     "cloudTranscriptionBaseUrl",
-    API_ENDPOINTS.TRANSCRIPTION_BASE
+    FORK_DEFAULTS.transcriptionBaseUrl ?? API_ENDPOINTS.TRANSCRIPTION_BASE
   ),
   transcriptionModelByProvider: readModelMemory("transcriptionModelByProvider"),
   reasoningModelByProvider: readModelMemory("reasoningModelByProvider"),
   // Secrets aren't hydrated yet at construction; the BYOK default is set
   // post-hydration in initializeSettings.
-  cloudTranscriptionMode: readString("cloudTranscriptionMode", "openwhispr"),
-  cleanupCloudMode: readString("cleanupCloudMode", "openwhispr"),
+  cloudTranscriptionMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("cloudTranscriptionMode", FORK_DEFAULTS.cloudMode)
+  ),
+  cleanupCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("cleanupCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   cleanupCloudBaseUrl: readString("cleanupCloudBaseUrl", API_ENDPOINTS.OPENAI_BASE),
   cortiEnvironment: readString("cortiEnvironment", "us"),
   cortiTenant: readString("cortiTenant", "base"),
@@ -1712,9 +1744,11 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   isSignedIn: readBoolean("isSignedIn", false),
 
   transcriptionMode: (() => {
-    const v = readString("transcriptionMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("transcriptionMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (v === "openwhispr" || v === "providers" || v === "local" || v === "self-hosted") return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   remoteTranscriptionType: (() => {
     const v = readString("remoteTranscriptionType", "lan");
@@ -1723,7 +1757,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   remoteTranscriptionUrl: readString("remoteTranscriptionUrl", ""),
   remoteTranscriptionModel: readString("remoteTranscriptionModel", ""),
   cleanupMode: (() => {
-    const v = readString("cleanupMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("cleanupMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1732,15 +1768,17 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   cleanupRemoteUrl: readString("cleanupRemoteUrl", ""),
   keepLocalModelLoaded: readBoolean("keepLocalModelLoaded", false),
 
   meetingTranscriptionMode: (() => {
-    const v = readString("meetingTranscriptionMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("meetingTranscriptionMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (v === "openwhispr" || v === "providers" || v === "local" || v === "self-hosted") return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   meetingUseLocalWhisper: readBoolean("meetingUseLocalWhisper", false),
   meetingWhisperModel: readString("meetingWhisperModel", ""),
@@ -1758,9 +1796,11 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   meetingRemoteTranscriptionUrl: readString("meetingRemoteTranscriptionUrl", ""),
 
   uploadTranscriptionMode: (() => {
-    const v = readString("uploadTranscriptionMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("uploadTranscriptionMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (v === "openwhispr" || v === "providers" || v === "local" || v === "self-hosted") return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   uploadUseLocalWhisper: readBoolean("uploadUseLocalWhisper", false),
   uploadWhisperModel: readString("uploadWhisperModel", ""),
@@ -1775,7 +1815,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   uploadRemoteTranscriptionModel: readString("uploadRemoteTranscriptionModel", ""),
 
   noteFormattingMode: (() => {
-    const v = readString("noteFormattingMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("noteFormattingMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1784,7 +1826,7 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   noteFormattingProvider: readString("noteFormattingProvider", ""),
   noteFormattingModel: readString("noteFormattingModel", ""),
@@ -1794,7 +1836,9 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   noteFormattingCustomApiKey: readString("noteFormattingCustomApiKey", ""),
 
   translationMode: (() => {
-    const v = readString("translationMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("translationMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1803,11 +1847,13 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   translationProvider: readString("translationProvider", ""),
   translationModel: readString("translationModel", ""),
-  translationCloudMode: readString("translationCloudMode", "openwhispr"),
+  translationCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("translationCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   translationCloudBaseUrl: readString("translationCloudBaseUrl", ""),
   translationRemoteUrl: readString("translationRemoteUrl", ""),
   translationCustomApiKey: readString("translationCustomApiKey", ""),
@@ -1909,9 +1955,13 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
 
   chatAgentModel: readString("chatAgentModel", "openai/gpt-oss-120b"),
   chatAgentProvider: readString("chatAgentProvider", "groq"),
-  chatAgentCloudMode: readString("chatAgentCloudMode", "openwhispr"),
+  chatAgentCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("chatAgentCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   chatAgentMode: (() => {
-    const v = readString("chatAgentMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("chatAgentMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1920,14 +1970,16 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   chatAgentRemoteUrl: readString("chatAgentRemoteUrl", ""),
   chatAgentCloudBaseUrl: readString("chatAgentCloudBaseUrl", ""),
   chatAgentCustomApiKey: readString("chatAgentCustomApiKey", ""),
 
   dictationAgentMode: (() => {
-    const v = readString("dictationAgentMode", "openwhispr");
+    const v = FORK_DEFAULTS.coerceInferenceMode(
+      readString("dictationAgentMode", FORK_DEFAULTS.inferenceMode)
+    );
     if (
       v === "openwhispr" ||
       v === "providers" ||
@@ -1936,23 +1988,29 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       v === "enterprise"
     )
       return v;
-    return "openwhispr" as InferenceMode;
+    return FORK_DEFAULTS.inferenceMode as InferenceMode;
   })(),
   dictationAgentProvider: readString("dictationAgentProvider", ""),
   dictationAgentModel: readString("dictationAgentModel", ""),
-  dictationAgentCloudMode: readString("dictationAgentCloudMode", "openwhispr"),
+  dictationAgentCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("dictationAgentCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   dictationAgentCloudBaseUrl: readString("dictationAgentCloudBaseUrl", ""),
   dictationAgentRemoteUrl: readString("dictationAgentRemoteUrl", ""),
   dictationAgentCustomApiKey: readString("dictationAgentCustomApiKey", ""),
 
   voiceAgentScreenContext: readBoolean("voiceAgentScreenContext", false),
   emailDraftTarget: normalizeEmailDraftTarget(readString("emailDraftTarget", "auto")),
+  toneStyleEnabled: readBoolean("toneStyleEnabled", false),
+  toneStyles: normalizeToneStyles(readString("toneStyles", "")),
   useDictationAgentVisionModel: readBoolean("useDictationAgentVisionModel", false),
   // Cloud already vision-routes screenshot commands, so the override is BYOK-only.
   dictationAgentVisionMode: "providers" as InferenceMode,
   dictationAgentVisionProvider: readString("dictationAgentVisionProvider", ""),
   dictationAgentVisionModel: readString("dictationAgentVisionModel", ""),
-  dictationAgentVisionCloudMode: readString("dictationAgentVisionCloudMode", "openwhispr"),
+  dictationAgentVisionCloudMode: FORK_DEFAULTS.coerceCloudMode(
+    readString("dictationAgentVisionCloudMode", FORK_DEFAULTS.cloudMode)
+  ),
   dictationAgentVisionCloudBaseUrl: readString("dictationAgentVisionCloudBaseUrl", ""),
   dictationAgentVisionCustomApiKey: readString("dictationAgentVisionCustomApiKey", ""),
 
@@ -1992,6 +2050,11 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
 
   setVoiceAgentScreenContext: createBooleanSetter("voiceAgentScreenContext"),
   setEmailDraftTarget: createStringSetter("emailDraftTarget"),
+  setToneStyleEnabled: createBooleanSetter("toneStyleEnabled"),
+  setToneStyles: (styles) => {
+    if (isBrowser) localStorage.setItem("toneStyles", JSON.stringify(styles));
+    useSettingsStore.setState({ toneStyles: styles });
+  },
   setUseDictationAgentVisionModel: createBooleanSetter("useDictationAgentVisionModel"),
   setDictationAgentVisionProvider: createStringSetter("dictationAgentVisionProvider"),
   setDictationAgentVisionModel: createStringSetter("dictationAgentVisionModel"),
@@ -3229,6 +3292,7 @@ export async function reconcileLocalModelSelections(): Promise<void> {
 export function reconcileRetiredCloudModelSelections(): void {
   const state = useSettingsStore.getState() as unknown as Record<string, unknown>;
   for (const scope of Object.values(INFERENCE_SCOPES)) {
+    if (!usesCloudModelCatalog(state[scope.storeKeys.mode])) continue;
     const provider = state[scope.storeKeys.provider] as string;
     const model = state[scope.storeKeys.model] as string;
     if (!provider || !model || provider === "tinfoil") continue;
@@ -3802,6 +3866,8 @@ export async function initializeSettings(): Promise<void> {
       }
     } else if (key === "emailDraftTarget") {
       value = normalizeEmailDraftTarget(newValue);
+    } else if (key === "toneStyles") {
+      value = normalizeToneStyles(newValue);
     } else {
       value = newValue;
     }

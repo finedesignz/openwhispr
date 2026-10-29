@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { CLOUD_ENABLED } from "../config/forkRuntime";
 import { authClient, getGracePeriodRemainingMs, isWithinGracePeriod } from "../lib/auth";
 import {
   accountScopeHasMandatoryReconciliation,
@@ -241,6 +242,18 @@ export function useAuth() {
     resolvedUserId,
     sessionResolutionFailed,
   ]);
+
+  // Cloud disabled (no backend configured): always the settled signed-out guest.
+  if (!CLOUD_ENABLED) {
+    return {
+      isSignedIn: false,
+      isGracePeriodOnly: false,
+      isLoaded: true,
+      session: null,
+      user: null,
+      refetch,
+    };
+  }
 
   return {
     isSignedIn,

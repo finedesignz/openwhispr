@@ -170,7 +170,7 @@ function buildFakeThis() {
 }
 
 test.before(async () => {
-  process.env.OPENWHISPR_API_URL = "https://api.openwhispr.test";
+  process.env.VITE_OPENWHISPR_API_URL = "https://api.openwhispr.test";
   server = new WebSocketServer({ host: "127.0.0.1", port: 0 });
   await once(server, "listening");
   server.on("connection", (socket) => {

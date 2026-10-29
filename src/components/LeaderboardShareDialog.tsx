@@ -1,3 +1,4 @@
+import { SITE_URL } from "../config/forkRuntime";
 import { useCallback, useState } from "react";
 import { Check, Download, Loader2, Share2 } from "./icons";
 import { useTranslation } from "react-i18next";
@@ -181,7 +182,7 @@ export default function LeaderboardShareDialog({
               void run("linkedin", async () => {
                 await copyImage();
                 const opened = await window.electronAPI.openExternal(
-                  "https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fopenwhispr.com"
+                  `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}`
                 );
                 if (!opened.success) throw new Error(opened.error || "Opening LinkedIn failed");
               })

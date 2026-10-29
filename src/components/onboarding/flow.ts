@@ -588,3 +588,12 @@ export function shouldSkipOnboardingSetupChoice({
     isEnterpriseWorkspaceEntitled(activeWorkspace)
   );
 }
+
+/** Without a hosted account backend there is nothing to sign in to: onboarding
+ * takes the guest path and the auth step is never shown. */
+export function resolveAuthPathForCloud(
+  cloudEnabled: boolean,
+  authPath: OnboardingAuthPath
+): OnboardingAuthPath {
+  return !cloudEnabled && authPath === null ? "guest" : authPath;
+}

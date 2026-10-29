@@ -1,5 +1,6 @@
 const { Menu } = require("electron");
 const { i18nMain } = require("./i18nMain");
+const { REPO_URL } = require("../config/forkConfig").fork;
 
 class MenuManager {
   static setupMainMenu(onOpenSettings) {
@@ -99,18 +100,22 @@ class MenuManager {
             { role: "window" },
           ],
         },
-        {
-          label: i18nMain.t("menu.help"),
-          submenu: [
-            {
-              label: i18nMain.t("menu.learnMore"),
-              click: async () => {
-                const { openExternalUrl } = require("./externalUrlOpener");
-                await openExternalUrl("https://github.com/OpenWhispr/openwhispr");
+        ...(REPO_URL
+          ? [
+              {
+                label: i18nMain.t("menu.help"),
+                submenu: [
+                  {
+                    label: i18nMain.t("menu.learnMore"),
+                    click: async () => {
+                      const { openExternalUrl } = require("./externalUrlOpener");
+                      await openExternalUrl(REPO_URL);
+                    },
+                  },
+                ],
               },
-            },
-          ],
-        },
+            ]
+          : []),
       ];
 
       const menu = Menu.buildFromTemplate(template);

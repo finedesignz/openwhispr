@@ -1,3 +1,5 @@
+import { CLOUD_ENABLED, SITE_URL } from "../config/forkRuntime";
+import { gateSettingsSection } from "../config/cloudSections";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
@@ -64,6 +66,8 @@ import {
 import { Alert, AlertTitle, AlertDescription } from "./ui/alert";
 import { useSettings } from "../hooks/useSettings";
 import { useDialogs } from "../hooks/useDialogs";
+import { useSignOut } from "../hooks/useSignOut";
+import { useAccountPlan } from "../hooks/useAccountPlan";
 import { useInsightsSyncOptIn } from "../hooks/useInsightsSyncOptIn";
 import { useLeaderboardParticipation } from "../hooks/useLeaderboardParticipation";
 import { useWhisper } from "../hooks/useWhisper";
@@ -116,6 +120,7 @@ import {
 } from "./ui/SettingsSection";
 import type { InferenceModeOption } from "./ui/SettingsSection";
 import { useSettingsLayout } from "./ui/useSettingsLayout";
+import { TabPanel } from "./ui/TabPanel";
 import { useUsage } from "../hooks/useUsage";
 import { cn } from "./lib/utils";
 import { GRADIENT_CIRCLE } from "./ui/gradientCircle";
@@ -136,8 +141,7 @@ import {
   type HotkeyRegistrationResult,
 } from "../stores/settingsStore";
 import { useWorkspaceStore } from "../stores/workspaceStore";
-import { highestPlan } from "../lib/usageStore";
-import { decideProPlanCardCta, resolveAccountPlan, storeSubscriptionsUrl } from "../lib/upsell";
+import { decideProPlanCardCta, storeSubscriptionsUrl } from "../lib/upsell";
 import {
   canChangeCloudBackupPreference,
   effectiveAudioRetentionDays,
@@ -150,7 +154,6 @@ import {
 } from "../stores/policyRules";
 import { usePolicyModeOptions, usePolicySnapshot } from "../hooks/usePolicy";
 import { usePolicyStore } from "../stores/policyStore";
-import { stopRecording } from "../stores/meetingRecordingStore";
 import { requestSignIn } from "../utils/requestSignIn";
 import { canManageSystemAudioInApp } from "../utils/systemAudioAccess";
 import WorkspaceSection from "./settings/WorkspaceSection";
@@ -159,6 +162,7 @@ import WorkspaceBillingOverview from "./settings/WorkspaceBillingOverview";
 import EnterpriseCheckoutDialog from "./settings/EnterpriseCheckoutDialog";
 import CreateWorkspaceDialog from "./CreateWorkspaceDialog";
 import ProfileSection from "./settings/ProfileSection";
+import ToneStyleSection from "./settings/ToneStyleSection";
 import { formatAmount } from "../utils/formatAmount";
 import { enterpriseProviderName, getTranscriptionProvider } from "../models/ModelRegistry";
 import { useManagedScopeResolution } from "../stores/enterpriseIdentityStore";
@@ -170,6 +174,7 @@ export type SettingsSectionType =
   | "workspace"
   | "general"
   | "hotkeys"
+  | "toneStyle"
   | "speechToText"
   | "llms"
   | "privacyData"
@@ -177,7 +182,7 @@ export type SettingsSectionType =
 
 interface SettingsPageProps {
   activeSection?: SettingsSectionType;
-  onNavigateToSection?: (section: SettingsSectionType) => void;
+  onNavigateToSection?: (section: SettingsSectionType, subTab?: string) => void;
   /** When a legacy section ID was used (e.g. `meetings`), land on the matching sub-tab. */
   initialSubTab?: string;
 }
@@ -544,14 +549,18 @@ function TranscriptionSection({
     isModeAllowed,
   } = usePolicyModeOptions<InferenceModeOption>(
     [
-      {
-        id: "openwhispr",
-        label: t("settingsPage.transcription.modes.openwhispr"),
-        description: t("settingsPage.transcription.modes.openwhisprDesc"),
-        icon: <Cloud className="w-4 h-4" />,
-        disabled: !isSignedIn,
-        signInRequired: !isSignedIn,
-      },
+      ...(CLOUD_ENABLED
+        ? [
+            {
+              id: "openwhispr" as const,
+              label: t("settingsPage.transcription.modes.openwhispr"),
+              description: t("settingsPage.transcription.modes.openwhisprDesc"),
+              icon: <Cloud className="w-4 h-4" />,
+              disabled: !isSignedIn,
+              signInRequired: !isSignedIn,
+            },
+          ]
+        : []),
       {
         id: "providers",
         label: t("settingsPage.transcription.modes.providers"),
@@ -923,10 +932,6 @@ function VADLabelWithInfo({ label, description }: { label: string; description: 
       </Popover>
     </div>
   );
-}
-
-function TabPanel({ active, children }: { active: boolean; children: React.ReactNode }) {
-  return <div className={active ? undefined : "hidden"}>{children}</div>;
 }
 
 // "Gabriel Stein" → "GS"; single names fall back to their first letter.
@@ -1385,8 +1390,6 @@ export default function SettingsPage({
     isWlroots: boolean;
     isCosmic: boolean;
     requiresWlCopy: boolean;
-    hasXclip: boolean;
-    hasXsel: boolean;
     isNixOS: boolean;
   } | null>(null);
   const [ydotoolGuideKey, setYdotoolGuideKey] = useState<string | null>(null);
@@ -1415,23 +1418,8 @@ export default function SettingsPage({
   const enterpriseCta: EnterpriseTileCta = billingWorkspacesLoaded
     ? enterpriseTileCta(billingWorkspaces, activeWorkspaceId)
     : { action: "contactSales", ownerName: null };
-  const coveringWorkspaces = billingWorkspaces.filter((workspace) =>
-    usage?.entitledWorkspaceIds?.includes(workspace.id)
-  );
-  const coveringWorkspaceNames = coveringWorkspaces.map((workspace) => workspace.name);
-  // Reads the usage payload, not the workspace store, so the upgrade affordances
-  // stay hidden across the window where the store is still loading.
-  const isWorkspaceCovered =
-    !usage?.isPersonallySubscribed && (usage?.entitledWorkspaceIds?.length ?? 0) > 0;
-  // Null until the store resolves, so the label waits rather than guessing a tier.
-  const coveringPlanLabel =
-    isWorkspaceCovered && coveringWorkspaces.length
-      ? t(
-          `settingsPage.workspace.billing.planLabel.${highestPlan(
-            coveringWorkspaces.map((workspace) => workspace.plan)
-          )}`
-        )
-      : null;
+  const { accountPlan, isWorkspaceCovered, coveringWorkspaceNames, coveringPlanLabel, planLabel } =
+    useAccountPlan(usage);
   const hasShownApproachingToast = useRef(false);
   useEffect(() => {
     if (usage?.isApproachingLimit && !hasShownApproachingToast.current) {
@@ -1859,15 +1847,6 @@ export default function SettingsPage({
     isWorkspaceCovered,
   });
   const storeBilling = usage?.storeBilling ?? null;
-  const accountPlan = resolveAccountPlan({
-    isTrial: usage?.isTrial ?? false,
-    isPastDue: usage?.isPastDue ?? false,
-    isPersonallySubscribed: usage?.isPersonallySubscribed ?? false,
-    storeBilling,
-    isWorkspaceCovered,
-    hasPeriodEnd: Boolean(usage?.currentPeriodEnd),
-    hasCoveringWorkspaceNames: coveringWorkspaceNames.length > 0,
-  });
   const storeUrl = storeBilling?.store ? storeSubscriptionsUrl(storeBilling.store) : null;
   const periodEndDate = usage?.currentPeriodEnd
     ? new Date(usage.currentPeriodEnd).toLocaleDateString(i18n.language, {
@@ -1876,7 +1855,7 @@ export default function SettingsPage({
         year: "numeric",
       })
     : null;
-  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { requestSignOut, isSigningOut } = useSignOut({ showConfirmDialog, showAlertDialog });
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] = useState(false);
   const [eraseDeviceData, setEraseDeviceData] = useState(false);
@@ -1959,28 +1938,6 @@ export default function SettingsPage({
     },
     [usage, toast, t]
   );
-
-  const handleSignOut = useCallback(async () => {
-    setIsSigningOut(true);
-    try {
-      // End a live meeting while its note is still in scope: signing out clears
-      // the account scope, and anything said after that could not be saved.
-      await stopRecording();
-      // Clear account-scoped renderer/session state before ending the session.
-      // Workspace-owned rows remain cached behind their membership boundary.
-      await syncService.purgeTeamSpacesForSignOut();
-      await signOut();
-      window.location.reload();
-    } catch (error) {
-      logger.error("Sign out failed", error, "auth");
-      showAlertDialog({
-        title: t("settingsPage.account.signOut.failedTitle"),
-        description: t("settingsPage.account.signOut.failedDescription"),
-      });
-    } finally {
-      setIsSigningOut(false);
-    }
-  }, [showAlertDialog, t]);
 
   const handleDeleteAccount = useCallback(() => {
     setEraseDeviceData(false);
@@ -2181,7 +2138,7 @@ export default function SettingsPage({
   );
 
   const renderSectionContent = () => {
-    switch (activeSection) {
+    switch (gateSettingsSection(activeSection, CLOUD_ENABLED)) {
       case "account":
         return (
           <div className="space-y-5">
@@ -2214,7 +2171,7 @@ export default function SettingsPage({
 
                 <div className="flex justify-end">
                   <Button
-                    onClick={handleSignOut}
+                    onClick={requestSignOut}
                     variant="outline"
                     disabled={isSigningOut}
                     size="sm"
@@ -2383,18 +2340,7 @@ export default function SettingsPage({
 
                         <SettingsPanelRow>
                           <SettingsRow
-                            label={
-                              accountPlan.row === "trial"
-                                ? t("settingsPage.account.planLabels.trial")
-                                : accountPlan.row === "pastDue"
-                                  ? t("settingsPage.account.planLabels.free")
-                                  : accountPlan.row === "personal" || accountPlan.row === "store"
-                                    ? usage.plan === "business"
-                                      ? t("settingsPage.account.planLabels.business")
-                                      : t("settingsPage.account.planLabels.pro")
-                                    : (coveringPlanLabel ??
-                                      t("settingsPage.account.planLabels.free"))
-                            }
+                            label={planLabel ?? t("settingsPage.account.planLabels.free")}
                             description={
                               accountPlan.description === "trial"
                                 ? t("settingsPage.account.planDescriptions.trial", {
@@ -2887,9 +2833,7 @@ export default function SettingsPage({
                             size="sm"
                             className="w-full h-6 text-[10px] text-muted-foreground"
                             onClick={() =>
-                              window.electronAPI?.openExternal?.(
-                                "https://openwhispr.com/contact-sales"
-                              )
+                              window.electronAPI?.openExternal?.(`${SITE_URL}/contact-sales`)
                             }
                           >
                             <Mail size={10} />
@@ -2903,9 +2847,7 @@ export default function SettingsPage({
                             size="sm"
                             className="w-full h-6 text-[10px]"
                             onClick={() =>
-                              window.electronAPI?.openExternal?.(
-                                "https://openwhispr.com/contact-sales"
-                              )
+                              window.electronAPI?.openExternal?.(`${SITE_URL}/contact-sales`)
                             }
                           >
                             <Mail size={10} />
@@ -2925,9 +2867,7 @@ export default function SettingsPage({
                           size="sm"
                           className="mt-2 w-full h-6 text-[10px]"
                           onClick={() =>
-                            window.electronAPI?.openExternal?.(
-                              "https://openwhispr.com/contact-sales"
-                            )
+                            window.electronAPI?.openExternal?.(`${SITE_URL}/contact-sales`)
                           }
                         >
                           <Mail size={10} />
@@ -3055,6 +2995,13 @@ export default function SettingsPage({
 
       case "workspace":
         return <WorkspaceSection initialSubTab={initialSubTab} />;
+
+      case "toneStyle":
+        return (
+          <ToneStyleSection
+            onOpenCleanupSettings={() => onNavigateToSection?.("llms", "dictationCleanup")}
+          />
+        );
 
       case "general":
         return (
@@ -3806,35 +3753,12 @@ EOF`,
                     },
                   ];
 
-                  if (ydotoolStatus.isKde) {
-                    checks.push({
-                      key: "hasXclip",
-                      label: "xclip",
-                      ok: ydotoolStatus.hasXclip || ydotoolStatus.hasXsel || false,
-                      required: true,
-                      desc: t("settingsPage.general.waylandPaste.xclipDesc", {
-                        defaultValue: "Clipboard tool for KDE Wayland paste (xclip or xsel)",
-                      }),
-                      steps: [
-                        {
-                          title: t("settingsPage.general.waylandPaste.guide.xclip.step1Title", {
-                            defaultValue: "Install xclip",
-                          }),
-                          cmds: [
-                            { cmd: "sudo dnf install xclip  # Fedora" },
-                            { cmd: "sudo apt install xclip  # Debian/Ubuntu" },
-                          ],
-                        },
-                      ],
-                    });
-                  }
-
-                  if (ydotoolStatus.requiresWlCopy) {
+                  if (ydotoolStatus.requiresWlCopy || ydotoolStatus.isKde) {
                     checks.push({
                       key: "hasWlCopy",
                       label: "wl-copy",
                       ok: ydotoolStatus.hasWlCopy,
-                      required: true,
+                      required: ydotoolStatus.requiresWlCopy || ydotoolStatus.isKde,
                       desc: t("settingsPage.general.waylandPaste.wlCopyDesc"),
                       steps: [
                         {

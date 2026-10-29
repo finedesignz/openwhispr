@@ -3,7 +3,10 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import fs from "fs";
+import { createRequire } from "module";
 import { fileURLToPath } from "url";
+
+const { RUNTIME_ENV_KEYS } = createRequire(import.meta.url)("./config/forkKeys.js");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,10 +37,9 @@ export default defineConfig(({ mode }) => {
       {
         name: "write-runtime-env",
         writeBundle() {
-          const runtimeEnv = {
-            VITE_OPENWHISPR_API_URL: env.VITE_OPENWHISPR_API_URL || "",
-            VITE_AUTH_URL: env.VITE_AUTH_URL || "",
-          };
+          const runtimeEnv = Object.fromEntries(
+            RUNTIME_ENV_KEYS.map((key) => [key, env[key] || ""])
+          );
           fs.writeFileSync(
             path.resolve(__dirname, "dist", "runtime-env.json"),
             JSON.stringify(runtimeEnv)
