@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   update-nix:
+    if: github.repository == 'OpenWhispr/openwhispr'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
