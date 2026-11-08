@@ -64,30 +64,32 @@
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| macOS/Linux | Owner: Windows only this milestone |
-| Notes cloud sync, referral, leaderboard, enterprise console, mobile sync | No backend of ours; dropped |
-| Redis access from the desktop | Credentials can't ship to clients; servers enforce revocation |
+| Feature                                                                  | Reason                                                        |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| macOS/Linux                                                              | Owner: Windows only this milestone                            |
+| Notes cloud sync, referral, leaderboard, enterprise console, mobile sync | No backend of ours; dropped                                   |
+| Redis access from the desktop                                            | Credentials can't ship to clients; servers enforce revocation |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| CI-01..CI-05 | Phase 1 | Pending |
-| OPS-01 | Phase 1 | Pending |
+| Requirement        | Phase   | Status  |
+| ------------------ | ------- | ------- |
+| CI-01..CI-05       | Phase 1 | Pending |
+| OPS-01             | Phase 1 | Pending |
 | BRAND-01..BRAND-07 | Phase 2 | Pending |
-| AUTH-01..AUTH-06 | Phase 3 | Pending |
-| STT-01..STT-04 | Phase 4 | Pending |
-| STT-05..STT-07 | Phase 5 | Pending |
-| FEAT-01..FEAT-03 | Phase 6 | Pending |
-| FEAT-04..FEAT-06 | Phase 7 | Pending |
+| AUTH-01..AUTH-06   | Phase 3 | Pending |
+| STT-01..STT-04     | Phase 4 | Pending |
+| STT-05..STT-07     | Phase 5 | Pending |
+| FEAT-01..FEAT-03   | Phase 6 | Pending |
+| FEAT-04..FEAT-06   | Phase 7 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 36 total
 - Mapped to phases: 36
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-11-08*
-*Last updated: 2026-11-08 after initial definition*
+
+_Requirements defined: 2026-11-08_
+_Last updated: 2026-11-08 after initial definition_

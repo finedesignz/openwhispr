@@ -60,21 +60,22 @@ See `.planning/REQUIREMENTS.md` (CI, BRAND, AUTH, STT, FEAT, OPS).
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Product name "Titanium Whisper" | Owner, Nov 8, 2026 | — Pending |
-| Change appId / AppUserModelID | Owner accepts reinstall; build userData migration | — Pending |
-| Sign-in through Titanium licensing, not OpenWhispr cloud | "Our own servers" — owner, Nov 8, 2026 | — Pending |
-| Host our own web search, gated by Titanium sign-in | Owner, Nov 8, 2026 | — Pending |
-| Windows only this milestone | Owner, Nov 8, 2026 | — Pending |
-| Desktop omits Redis blocklist; servers enforce revocation | Redis credentials can't ship to clients | — Pending |
-| License key is the bearer for our servers (stt-api, search) | One credential, offline-verifiable server-side | — Pending |
+| Decision                                                    | Rationale                                         | Outcome   |
+| ----------------------------------------------------------- | ------------------------------------------------- | --------- |
+| Product name "Titanium Whisper"                             | Owner, Nov 8, 2026                                | — Pending |
+| Change appId / AppUserModelID                               | Owner accepts reinstall; build userData migration | — Pending |
+| Sign-in through Titanium licensing, not OpenWhispr cloud    | "Our own servers" — owner, Nov 8, 2026            | — Pending |
+| Host our own web search, gated by Titanium sign-in          | Owner, Nov 8, 2026                                | — Pending |
+| Windows only this milestone                                 | Owner, Nov 8, 2026                                | — Pending |
+| Desktop omits Redis blocklist; servers enforce revocation   | Redis credentials can't ship to clients           | — Pending |
+| License key is the bearer for our servers (stt-api, search) | One credential, offline-verifiable server-side    | — Pending |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd-transition`):
+
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -82,10 +83,12 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone** (via `/gsd-complete-milestone`):
+
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-08 after initialization*
+
+_Last updated: 2026-11-08 after initialization_
