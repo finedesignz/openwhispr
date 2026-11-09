@@ -12,9 +12,8 @@ test("fails when the snapshot turns the hosted cloud on", () => {
     VITE_OPENWHISPR_API_URL: "https://api.openwhispr.com",
   });
   assert.ok(problems.some((p) => p.startsWith("hosted cloud enabled")));
-  assert.ok(
-    problems.includes("VITE_AUTH_URL points at an OpenWhispr-hosted host (auth.openwhispr.com)")
-  );
+  const expected = "VITE_AUTH_URL points at an OpenWhispr-hosted host (auth.openwhispr.com)";
+  assert.ok(problems.some((p) => p === expected));
 });
 
 test("fails when any override points at an OpenWhispr-hosted host", () => {
