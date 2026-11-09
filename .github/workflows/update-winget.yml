@@ -23,7 +23,7 @@ jobs:
   update-winget:
     # winget-releaser handles stable releases only, so skip prereleases here
     # rather than letting the version guard below fail the run.
-    if: github.event_name != 'release' || !github.event.release.prerelease
+    if: github.repository == 'OpenWhispr/openwhispr' && (github.event_name != 'release' || !github.event.release.prerelease)
     runs-on: ubuntu-latest
     steps:
       - name: Get release version

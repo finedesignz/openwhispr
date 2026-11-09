@@ -19,6 +19,7 @@ env:
 
 jobs:
   tests:
+    if: github.repository == 'OpenWhispr/openwhispr'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -59,6 +60,7 @@ jobs:
           REQUIRE_DB_TESTS: "1"
 
   build-linux:
+    if: github.repository == 'OpenWhispr/openwhispr'
     needs: tests
     runs-on: ubuntu-latest
     steps:
@@ -145,11 +147,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BRAND_FONTS_REQUIRED: "1"
-          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL || 'https://auth.openwhispr.com' }}
+          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL }}
           VITE_OPENWHISPR_API_URL: ${{ vars.VITE_OPENWHISPR_API_URL }}
           VITE_OPENWHISPR_OAUTH_CALLBACK_URL: ${{ vars.VITE_OPENWHISPR_OAUTH_CALLBACK_URL }}
 
   build-windows:
+    if: github.repository == 'OpenWhispr/openwhispr'
     needs: tests
     runs-on: windows-latest
     steps:
@@ -256,7 +259,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BRAND_FONTS_REQUIRED: "1"
-          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL || 'https://auth.openwhispr.com' }}
+          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL }}
           VITE_OPENWHISPR_API_URL: ${{ vars.VITE_OPENWHISPR_API_URL }}
           VITE_OPENWHISPR_OAUTH_CALLBACK_URL: ${{ vars.VITE_OPENWHISPR_OAUTH_CALLBACK_URL }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -264,6 +267,7 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
   build-macos:
+    if: github.repository == 'OpenWhispr/openwhispr'
     needs: tests
     runs-on: macos-latest
     strategy:
@@ -383,7 +387,7 @@ jobs:
           TARGET_ARCH: ${{ matrix.arch }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BRAND_FONTS_REQUIRED: "1"
-          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL || 'https://auth.openwhispr.com' }}
+          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL }}
           VITE_OPENWHISPR_API_URL: ${{ vars.VITE_OPENWHISPR_API_URL }}
           VITE_OPENWHISPR_OAUTH_CALLBACK_URL: ${{ vars.VITE_OPENWHISPR_OAUTH_CALLBACK_URL }}
           CSC_IDENTITY_AUTO_DISCOVERY: true
