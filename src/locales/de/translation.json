@@ -11,7 +11,8 @@
       "chineseScriptDescription": "Wenn Chinesisch erkannt wird, diktierte Transkripte in vereinfachte oder traditionelle Zeichen umwandeln. Gesprochenes Chinesisch klingt gleich; Whisper liefert nur eine Schrift.",
       "chineseScriptAsTranscribed": "Wie transkribiert belassen",
       "chineseScriptSimplified": "Vereinfacht (简体)",
-      "chineseScriptTraditional": "Traditionell (繁體)"
+      "chineseScriptTraditional": "Traditionell (繁體)",
+      "forkSttEnglishOnly": "Unser Transkriptionsserver versteht nur Englisch. Wähle Englisch oder Automatisch erkennen oder unter Sprache zu Text ein anderes Modell."
     },
     "noteFiles": {
       "title": "Notizen als Dateien speichern",

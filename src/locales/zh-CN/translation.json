@@ -11,7 +11,8 @@
       "chineseScriptDescription": "检测到中文时，将听写的转录结果转换为简体或繁体。口语听起来一样；Whisper 只会输出一种字形。",
       "chineseScriptAsTranscribed": "保持转录原样",
       "chineseScriptSimplified": "简体",
-      "chineseScriptTraditional": "繁体"
+      "chineseScriptTraditional": "繁体",
+      "forkSttEnglishOnly": "我们的转录服务器只支持英语。请选择英语或自动检测，或在“语音转文字”中选择其他模型。"
     },
     "noteFiles": {
       "title": "将笔记保存为文件",

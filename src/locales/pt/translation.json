@@ -11,7 +11,8 @@
       "chineseScriptDescription": "Quando o chinês for detectado, converter as transcrições ditadas para caracteres simplificados ou tradicionais. O chinês falado soa igual; o Whisper só retorna uma escrita.",
       "chineseScriptAsTranscribed": "Manter como transcrito",
       "chineseScriptSimplified": "Simplificado (简体)",
-      "chineseScriptTraditional": "Tradicional (繁體)"
+      "chineseScriptTraditional": "Tradicional (繁體)",
+      "forkSttEnglishOnly": "Nosso servidor de transcrição só entende inglês. Escolha Inglês ou Detecção automática, ou outro modelo em Voz para texto."
     },
     "noteFiles": {
       "title": "Salvar notas como arquivos",

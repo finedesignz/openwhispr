@@ -18,3 +18,36 @@ export function resolveForkDefaults(cloudEnabled: boolean, stt = DEFAULT_STT) {
 }
 
 export const FORK_DEFAULTS = resolveForkDefaults(CLOUD_ENABLED);
+
+/**
+ * STT-04: our STT API serves one model; when that model is English-only (registry
+ * `language: "en"`) and the user dictates through it, any other fixed language
+ * cannot transcribe correctly. Returns true when the language picker should warn.
+ */
+export function forkSttLanguageMismatch(
+  settings: {
+    cloudTranscriptionProvider?: string | null;
+    cloudTranscriptionBaseUrl?: string | null;
+    cloudTranscriptionModel?: string | null;
+    preferredLanguage?: string | null;
+    useLocalWhisper?: boolean;
+  },
+  modelLanguage: (model: string) => string | undefined,
+  stt = DEFAULT_STT
+): boolean {
+  if (settings.useLocalWhisper) return false;
+  if (settings.cloudTranscriptionProvider !== "custom") return false;
+  const host = (url: string | null | undefined) => {
+    try {
+      return new URL(url || "").hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  };
+  if (!host(settings.cloudTranscriptionBaseUrl)) return false;
+  if (host(settings.cloudTranscriptionBaseUrl) !== host(stt.baseUrl)) return false;
+  const model = settings.cloudTranscriptionModel || stt.model;
+  if (modelLanguage(model) !== "en") return false;
+  const lang = (settings.preferredLanguage || "auto").toLowerCase();
+  return lang !== "auto" && lang !== "en" && !lang.startsWith("en-");
+}

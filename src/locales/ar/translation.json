@@ -4145,7 +4145,8 @@
       "chineseScriptDescription": "عند اكتشاف اللغة الصينية، سيتم تحويل النص المُملى إلى أحرف مبسطة أو تقليدية. اللغة الصينية المنطوقة هي نفسها في كلتا الحالتين؛ لا يُرجع Whisper سوى نظام كتابة واحد.",
       "chineseScriptAsTranscribed": "الإبقاء على النص كما تم تفريغه",
       "chineseScriptSimplified": "مبسطة (简体)",
-      "chineseScriptTraditional": "تقليدية (繁體)"
+      "chineseScriptTraditional": "تقليدية (繁體)",
+      "forkSttEnglishOnly": "خادم النسخ لدينا يفهم الإنجليزية فقط. اختر الإنجليزية أو الاكتشاف التلقائي، أو اختر نموذجًا آخر في تحويل الكلام إلى نص."
     },
     "noteFiles": {
       "title": "حفظ الملاحظات كملفات",

@@ -164,6 +164,8 @@ import CreateWorkspaceDialog from "./CreateWorkspaceDialog";
 import ProfileSection from "./settings/ProfileSection";
 import ToneStyleSection from "./settings/ToneStyleSection";
 import TitaniumAccountSection from "./settings/TitaniumAccountSection";
+import { showForkSttLanguageWarning } from "../config/forkSttLanguage";
+import { InfoBox } from "./ui/InfoBox";
 import { formatAmount } from "../utils/formatAmount";
 import { enterpriseProviderName, getTranscriptionProvider } from "../models/ModelRegistry";
 import { useManagedScopeResolution } from "../stores/enterpriseIdentityStore";
@@ -3306,6 +3308,21 @@ export default function SettingsPage({
                     />
                   </SettingsRow>
                 </SettingsPanelRow>
+                {showForkSttLanguageWarning({
+                  cloudTranscriptionProvider,
+                  cloudTranscriptionBaseUrl,
+                  cloudTranscriptionModel,
+                  preferredLanguage,
+                  useLocalWhisper,
+                }) && (
+                  <SettingsPanelRow>
+                    <InfoBox variant="warning" className="p-3">
+                      <p className="text-[13px] text-foreground">
+                        {t("settings.language.forkSttEnglishOnly")}
+                      </p>
+                    </InfoBox>
+                  </SettingsPanelRow>
+                )}
                 {preferredLanguage === "auto" && (
                   <SettingsPanelRow>
                     <SettingsRow
