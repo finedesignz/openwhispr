@@ -1670,6 +1670,10 @@
       "system": {
         "description": "Updates, storage & developer tools",
         "label": "System"
+      },
+      "titaniumAccount": {
+        "label": "Titanium account",
+        "description": "Sign in & license"
       }
     },
     "title": "Settings"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "Denied",
     "permissionRestricted": "Restricted",
     "permissionNotDetermined": "Not requested"
+  },
+  "titaniumAccount": {
+    "title": "Titanium account",
+    "description": "Sign in with your Titanium Labs account to use {{brand}} with our transcription servers.",
+    "signedInAs": "Signed in",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
+    "signInAgain": "Restart sign-in",
+    "signedOut": {
+      "label": "Not signed in",
+      "description": "Sign-in opens in your browser and returns here when you're done.",
+      "pending": "Finish signing in in your browser. This page updates when you're back."
+    },
+    "license": {
+      "label": "License",
+      "active": "Active, no expiry",
+      "activeUntil": "Active until {{date}}",
+      "statusActive": "Active",
+      "statusNone": "No license",
+      "reasons": {
+        "no_license": "Your account has no {{brand}} license yet. Contact {{supportEmail}} to get one.",
+        "expired": "Your license has expired. Contact {{supportEmail}} to renew it.",
+        "audience_mismatch": "This license is for a different product.",
+        "unconfigured": "This build can't check licenses yet. Contact {{supportEmail}}.",
+        "invalid": "Your license couldn't be verified. Sign out and sign in again."
+      }
+    },
+    "errors": {
+      "state_mismatch": "That sign-in link didn't come from this app. Start sign-in again from here.",
+      "no_pending_sign_in": "That sign-in expired or was started elsewhere. Start sign-in again from here.",
+      "exchange_unreachable": "Couldn't reach Titanium to finish signing in. Check your connection and try again.",
+      "invalid_code_verifier": "Sign-in couldn't be verified. Start sign-in again from here.",
+      "token_not_found": "That sign-in link was already used or has expired. Start sign-in again.",
+      "app_mismatch": "That sign-in was for a different app. Start sign-in again from here.",
+      "generic": "Sign-in didn't finish. Try again."
+    }
   }
 }

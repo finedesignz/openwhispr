@@ -1670,6 +1670,10 @@
       "system": {
         "description": "Updates, Speicher & Entwicklertools",
         "label": "System"
+      },
+      "titaniumAccount": {
+        "label": "Titanium-Konto",
+        "description": "Anmeldung und Lizenz"
       }
     },
     "title": "Einstellungen"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "Verweigert",
     "permissionRestricted": "Eingeschränkt",
     "permissionNotDetermined": "Nicht angefragt"
+  },
+  "titaniumAccount": {
+    "title": "Titanium-Konto",
+    "description": "Melde dich mit deinem Titanium-Labs-Konto an, um {{brand}} mit unseren Transkriptionsservern zu nutzen.",
+    "signedInAs": "Angemeldet",
+    "signOut": "Abmelden",
+    "signIn": "Anmelden",
+    "signInAgain": "Anmeldung neu starten",
+    "signedOut": {
+      "label": "Nicht angemeldet",
+      "description": "Die Anmeldung öffnet sich im Browser und kehrt danach hierher zurück.",
+      "pending": "Schließe die Anmeldung im Browser ab. Diese Seite aktualisiert sich, wenn du zurück bist."
+    },
+    "license": {
+      "label": "Lizenz",
+      "active": "Aktiv, ohne Ablauf",
+      "activeUntil": "Aktiv bis {{date}}",
+      "statusActive": "Aktiv",
+      "statusNone": "Keine Lizenz",
+      "reasons": {
+        "no_license": "Dein Konto hat noch keine {{brand}}-Lizenz. Schreib an {{supportEmail}}, um eine zu erhalten.",
+        "expired": "Deine Lizenz ist abgelaufen. Schreib an {{supportEmail}}, um sie zu verlängern.",
+        "audience_mismatch": "Diese Lizenz gilt für ein anderes Produkt.",
+        "unconfigured": "Diese Version kann Lizenzen noch nicht prüfen. Schreib an {{supportEmail}}.",
+        "invalid": "Deine Lizenz konnte nicht geprüft werden. Melde dich ab und wieder an."
+      }
+    },
+    "errors": {
+      "state_mismatch": "Dieser Anmeldelink stammt nicht von dieser App. Starte die Anmeldung hier neu.",
+      "no_pending_sign_in": "Diese Anmeldung ist abgelaufen oder wurde woanders gestartet. Starte sie hier neu.",
+      "exchange_unreachable": "Titanium war nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+      "invalid_code_verifier": "Die Anmeldung konnte nicht bestätigt werden. Starte sie hier neu.",
+      "token_not_found": "Dieser Link wurde schon benutzt oder ist abgelaufen. Starte die Anmeldung neu.",
+      "app_mismatch": "Diese Anmeldung galt einer anderen App. Starte sie hier neu.",
+      "generic": "Die Anmeldung wurde nicht abgeschlossen. Versuche es erneut."
+    }
   }
 }

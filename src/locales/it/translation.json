@@ -1576,6 +1576,10 @@
       "workspace": {
         "description": "Membri, spazi del team e chiavi API",
         "label": "Area di lavoro"
+      },
+      "titaniumAccount": {
+        "label": "Account Titanium",
+        "description": "Accesso e licenza"
       }
     },
     "title": "Impostazioni"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "Negata",
     "permissionRestricted": "Limitata",
     "permissionNotDetermined": "Non richiesta"
+  },
+  "titaniumAccount": {
+    "title": "Account Titanium",
+    "description": "Accedi con il tuo account Titanium Labs per usare {{brand}} con i nostri server di trascrizione.",
+    "signedInAs": "Accesso effettuato",
+    "signOut": "Esci",
+    "signIn": "Accedi",
+    "signInAgain": "Ricomincia l'accesso",
+    "signedOut": {
+      "label": "Accesso non effettuato",
+      "description": "L'accesso si apre nel browser e torna qui al termine.",
+      "pending": "Completa l'accesso nel browser. Questa pagina si aggiorna al tuo ritorno."
+    },
+    "license": {
+      "label": "Licenza",
+      "active": "Attiva, senza scadenza",
+      "activeUntil": "Attiva fino al {{date}}",
+      "statusActive": "Attiva",
+      "statusNone": "Nessuna licenza",
+      "reasons": {
+        "no_license": "Il tuo account non ha ancora una licenza {{brand}}. Scrivi a {{supportEmail}} per ottenerne una.",
+        "expired": "La tua licenza è scaduta. Scrivi a {{supportEmail}} per rinnovarla.",
+        "audience_mismatch": "Questa licenza è per un altro prodotto.",
+        "unconfigured": "Questa versione non può ancora verificare le licenze. Scrivi a {{supportEmail}}.",
+        "invalid": "Impossibile verificare la tua licenza. Esci e accedi di nuovo."
+      }
+    },
+    "errors": {
+      "state_mismatch": "Quel link di accesso non proviene da questa app. Ricomincia l'accesso da qui.",
+      "no_pending_sign_in": "Quell'accesso è scaduto o è stato avviato altrove. Ricomincia da qui.",
+      "exchange_unreachable": "Impossibile raggiungere Titanium per completare l'accesso. Controlla la connessione e riprova.",
+      "invalid_code_verifier": "Impossibile verificare l'accesso. Ricomincia da qui.",
+      "token_not_found": "Quel link è già stato usato o è scaduto. Ricomincia l'accesso.",
+      "app_mismatch": "Quell'accesso era per un'altra app. Ricomincia da qui.",
+      "generic": "L'accesso non è stato completato. Riprova."
+    }
   }
 }

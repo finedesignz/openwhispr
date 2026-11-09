@@ -1628,6 +1628,10 @@
       "workspace": {
         "label": "Espacio de trabajo",
         "description": "Miembros, espacios de equipo y claves API"
+      },
+      "titaniumAccount": {
+        "label": "Cuenta Titanium",
+        "description": "Inicio de sesión y licencia"
       }
     },
     "title": "Ajustes"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "Denegado",
     "permissionRestricted": "Restringido",
     "permissionNotDetermined": "No solicitado"
+  },
+  "titaniumAccount": {
+    "title": "Cuenta Titanium",
+    "description": "Inicia sesión con tu cuenta de Titanium Labs para usar {{brand}} con nuestros servidores de transcripción.",
+    "signedInAs": "Sesión iniciada",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión",
+    "signInAgain": "Reiniciar inicio de sesión",
+    "signedOut": {
+      "label": "Sin sesión iniciada",
+      "description": "El inicio de sesión se abre en tu navegador y vuelve aquí al terminar.",
+      "pending": "Termina de iniciar sesión en tu navegador. Esta página se actualiza cuando vuelvas."
+    },
+    "license": {
+      "label": "Licencia",
+      "active": "Activa, sin vencimiento",
+      "activeUntil": "Activa hasta el {{date}}",
+      "statusActive": "Activa",
+      "statusNone": "Sin licencia",
+      "reasons": {
+        "no_license": "Tu cuenta aún no tiene licencia de {{brand}}. Escribe a {{supportEmail}} para obtener una.",
+        "expired": "Tu licencia ha vencido. Escribe a {{supportEmail}} para renovarla.",
+        "audience_mismatch": "Esta licencia es para otro producto.",
+        "unconfigured": "Esta versión todavía no puede comprobar licencias. Escribe a {{supportEmail}}.",
+        "invalid": "No se pudo verificar tu licencia. Cierra sesión y vuelve a iniciarla."
+      }
+    },
+    "errors": {
+      "state_mismatch": "Ese enlace de inicio de sesión no procede de esta app. Vuelve a iniciar sesión desde aquí.",
+      "no_pending_sign_in": "Ese inicio de sesión caducó o se inició en otro lugar. Vuelve a iniciar sesión desde aquí.",
+      "exchange_unreachable": "No se pudo conectar con Titanium para terminar. Comprueba tu conexión e inténtalo de nuevo.",
+      "invalid_code_verifier": "No se pudo verificar el inicio de sesión. Vuelve a iniciar sesión desde aquí.",
+      "token_not_found": "Ese enlace ya se usó o caducó. Vuelve a iniciar sesión.",
+      "app_mismatch": "Ese inicio de sesión era para otra app. Vuelve a iniciar sesión desde aquí.",
+      "generic": "El inicio de sesión no terminó. Inténtalo de nuevo."
+    }
   }
 }

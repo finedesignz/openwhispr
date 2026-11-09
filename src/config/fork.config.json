@@ -3,14 +3,16 @@
   "APP_ID": "com.titaniumlabs.titaniumwhisper",
   "URL_SCHEME": "titaniumwhisper",
   "USER_DATA_DIR": "Titanium Whisper",
-  "LEGACY_USER_DATA_DIRS": ["OpenWhispr", "open-whispr"],
+  "LEGACY_USER_DATA_DIRS": [
+    "OpenWhispr",
+    "open-whispr"
+  ],
   "WINDOWS_TRAY_GUID": "580c76fe-f810-4c10-97bd-380060508a21",
   "API_URL": "",
   "AUTH_URL": "",
   "ADMIN_URL": "",
   "SITE_URL": "",
   "DOCS_URL": "",
-  "HELP_LINK_ORIGIN": "https://docs.openwhispr.com",
   "SUPPORT_EMAIL": "support@titaniumlabs.us",
   "SHARE_VIEWER_URL": "",
   "MCP_URL": "",
@@ -20,5 +22,11 @@
   "DEFAULT_STT": {
     "baseUrl": "https://x1gsjcjrmssitgnh7hthg7nd.coolify.titaniumlabs.us/v1",
     "model": "parakeet-unified-en-0.6b"
+  },
+  "TITANIUM": {
+    "portalUrl": "https://auth.titaniumlabs.us",
+    "appSlug": "titanium-whisper",
+    "keygenProductId": "",
+    "publicKey": "8eb5121238b5432c227285992d813ca688136785b9552bbe457c87dd94aadbd8"
   }
 }

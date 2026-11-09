@@ -1576,6 +1576,10 @@
       "workspace": {
         "description": "成员、团队空间和 API 密钥",
         "label": "工作区"
+      },
+      "titaniumAccount": {
+        "label": "Titanium 账户",
+        "description": "登录与许可证"
       }
     },
     "title": "设置"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "已拒绝",
     "permissionRestricted": "受限",
     "permissionNotDetermined": "尚未请求"
+  },
+  "titaniumAccount": {
+    "title": "Titanium 账户",
+    "description": "使用 Titanium Labs 账户登录，即可通过我们的转录服务器使用 {{brand}}。",
+    "signedInAs": "已登录",
+    "signOut": "退出登录",
+    "signIn": "登录",
+    "signInAgain": "重新开始登录",
+    "signedOut": {
+      "label": "未登录",
+      "description": "登录会在浏览器中打开，完成后回到这里。",
+      "pending": "请在浏览器中完成登录。回来后此页面会更新。"
+    },
+    "license": {
+      "label": "许可证",
+      "active": "有效，无到期日",
+      "activeUntil": "有效期至 {{date}}",
+      "statusActive": "有效",
+      "statusNone": "无许可证",
+      "reasons": {
+        "no_license": "你的账户还没有 {{brand}} 许可证。请联系 {{supportEmail}} 获取。",
+        "expired": "你的许可证已过期。请联系 {{supportEmail}} 续期。",
+        "audience_mismatch": "此许可证属于其他产品。",
+        "unconfigured": "此版本暂时无法验证许可证。请联系 {{supportEmail}}。",
+        "invalid": "无法验证你的许可证。请退出后重新登录。"
+      }
+    },
+    "errors": {
+      "state_mismatch": "该登录链接并非由此应用发起。请从这里重新开始登录。",
+      "no_pending_sign_in": "该登录已过期或在别处发起。请从这里重新开始。",
+      "exchange_unreachable": "无法连接 Titanium 完成登录。请检查网络后重试。",
+      "invalid_code_verifier": "无法验证此次登录。请从这里重新开始。",
+      "token_not_found": "该链接已被使用或已过期。请重新开始登录。",
+      "app_mismatch": "该登录属于其他应用。请从这里重新开始。",
+      "generic": "登录未完成。请重试。"
+    }
   }
 }

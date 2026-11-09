@@ -1576,6 +1576,10 @@
       "workspace": {
         "description": "メンバー、チームスペース、API キー",
         "label": "ワークスペース"
+      },
+      "titaniumAccount": {
+        "label": "Titanium アカウント",
+        "description": "サインインとライセンス"
       }
     },
     "title": "設定"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "拒否",
     "permissionRestricted": "制限あり",
     "permissionNotDetermined": "未要求"
+  },
+  "titaniumAccount": {
+    "title": "Titanium アカウント",
+    "description": "Titanium Labs アカウントでサインインすると、{{brand}} で当社の文字起こしサーバーを使えます。",
+    "signedInAs": "サインイン済み",
+    "signOut": "サインアウト",
+    "signIn": "サインイン",
+    "signInAgain": "サインインをやり直す",
+    "signedOut": {
+      "label": "サインインしていません",
+      "description": "サインインはブラウザで開き、完了するとここに戻ります。",
+      "pending": "ブラウザでサインインを完了してください。戻るとこのページが更新されます。"
+    },
+    "license": {
+      "label": "ライセンス",
+      "active": "有効（期限なし）",
+      "activeUntil": "{{date}} まで有効",
+      "statusActive": "有効",
+      "statusNone": "ライセンスなし",
+      "reasons": {
+        "no_license": "このアカウントにはまだ {{brand}} のライセンスがありません。{{supportEmail}} までお問い合わせください。",
+        "expired": "ライセンスの期限が切れています。更新は {{supportEmail}} までお問い合わせください。",
+        "audience_mismatch": "このライセンスは別の製品用です。",
+        "unconfigured": "このビルドはまだライセンスを確認できません。{{supportEmail}} までお問い合わせください。",
+        "invalid": "ライセンスを確認できませんでした。サインアウトしてもう一度サインインしてください。"
+      }
+    },
+    "errors": {
+      "state_mismatch": "このサインインリンクはこのアプリから開始されたものではありません。ここからやり直してください。",
+      "no_pending_sign_in": "このサインインは期限切れか、別の場所で開始されました。ここからやり直してください。",
+      "exchange_unreachable": "サインインを完了するために Titanium に接続できませんでした。接続を確認してもう一度お試しください。",
+      "invalid_code_verifier": "サインインを確認できませんでした。ここからやり直してください。",
+      "token_not_found": "このリンクは使用済みか期限切れです。サインインをやり直してください。",
+      "app_mismatch": "このサインインは別のアプリ用でした。ここからやり直してください。",
+      "generic": "サインインが完了しませんでした。もう一度お試しください。"
+    }
   }
 }

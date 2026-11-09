@@ -1576,6 +1576,10 @@
       "workspace": {
         "description": "成員、團隊空間與 API 金鑰",
         "label": "工作區"
+      },
+      "titaniumAccount": {
+        "label": "Titanium 帳戶",
+        "description": "登入與授權"
       }
     },
     "title": "設定"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "已拒絕",
     "permissionRestricted": "受限",
     "permissionNotDetermined": "尚未請求"
+  },
+  "titaniumAccount": {
+    "title": "Titanium 帳戶",
+    "description": "使用 Titanium Labs 帳戶登入，即可透過我們的轉錄伺服器使用 {{brand}}。",
+    "signedInAs": "已登入",
+    "signOut": "登出",
+    "signIn": "登入",
+    "signInAgain": "重新開始登入",
+    "signedOut": {
+      "label": "尚未登入",
+      "description": "登入會在瀏覽器中開啟，完成後回到這裡。",
+      "pending": "請在瀏覽器中完成登入。回來後此頁面會更新。"
+    },
+    "license": {
+      "label": "授權",
+      "active": "有效，無到期日",
+      "activeUntil": "有效至 {{date}}",
+      "statusActive": "有效",
+      "statusNone": "無授權",
+      "reasons": {
+        "no_license": "你的帳戶還沒有 {{brand}} 授權。請聯絡 {{supportEmail}} 取得。",
+        "expired": "你的授權已過期。請聯絡 {{supportEmail}} 續約。",
+        "audience_mismatch": "此授權屬於其他產品。",
+        "unconfigured": "此版本暫時無法驗證授權。請聯絡 {{supportEmail}}。",
+        "invalid": "無法驗證你的授權。請登出後重新登入。"
+      }
+    },
+    "errors": {
+      "state_mismatch": "此登入連結並非由此應用程式發起。請從這裡重新開始登入。",
+      "no_pending_sign_in": "此登入已過期或在別處發起。請從這裡重新開始。",
+      "exchange_unreachable": "無法連線到 Titanium 完成登入。請檢查網路後再試一次。",
+      "invalid_code_verifier": "無法驗證此次登入。請從這裡重新開始。",
+      "token_not_found": "此連結已使用或已過期。請重新開始登入。",
+      "app_mismatch": "此登入屬於其他應用程式。請從這裡重新開始。",
+      "generic": "登入未完成。請再試一次。"
+    }
   }
 }

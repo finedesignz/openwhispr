@@ -471,6 +471,11 @@ function initializeCoreManagers() {
 
   debugLogger = require("./src/helpers/debugLogger");
   debugLogger.ensureFileLogging();
+  require("./src/helpers/titanium/titaniumIpc").initTitaniumAuth({
+    forkConfig: FORK_IDENTITY,
+    urlScheme: OAUTH_PROTOCOL,
+    logger: debugLogger,
+  });
   if (process.env.TW_USERDATA_MIGRATION) {
     // Paths only; the migration never reads file contents.
     debugLogger.info("Legacy userData migration", JSON.parse(process.env.TW_USERDATA_MIGRATION));
@@ -1036,6 +1041,13 @@ async function applySessionTokenAndRefresh(token) {
 
 async function handleOAuthDeepLink(deepLinkUrl) {
   try {
+    // Titanium sign-in returns to <scheme>://auth/callback?act=..&state=..
+    const titanium = require("./src/helpers/titanium/titaniumIpc").getTitaniumSession();
+    if (titanium?.isCallbackUrl(deepLinkUrl)) {
+      await titanium.handleCallback(deepLinkUrl);
+      windowManager?.showControlPanel();
+      return;
+    }
     const parsed = new URL(deepLinkUrl);
     const bearerToken = parsed.searchParams.get("bearer_token");
     if (bearerToken) {

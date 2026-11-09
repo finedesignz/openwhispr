@@ -1670,6 +1670,10 @@
       "system": {
         "description": "Mises à jour, stockage & outils de développement",
         "label": "Système"
+      },
+      "titaniumAccount": {
+        "label": "Compte Titanium",
+        "description": "Connexion et licence"
       }
     },
     "title": "Paramètres"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "Refusé",
     "permissionRestricted": "Restreint",
     "permissionNotDetermined": "Non demandé"
+  },
+  "titaniumAccount": {
+    "title": "Compte Titanium",
+    "description": "Connectez-vous avec votre compte Titanium Labs pour utiliser {{brand}} avec nos serveurs de transcription.",
+    "signedInAs": "Connecté",
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter",
+    "signInAgain": "Recommencer la connexion",
+    "signedOut": {
+      "label": "Non connecté",
+      "description": "La connexion s'ouvre dans votre navigateur et revient ici une fois terminée.",
+      "pending": "Terminez la connexion dans votre navigateur. Cette page se met à jour à votre retour."
+    },
+    "license": {
+      "label": "Licence",
+      "active": "Active, sans expiration",
+      "activeUntil": "Active jusqu'au {{date}}",
+      "statusActive": "Active",
+      "statusNone": "Aucune licence",
+      "reasons": {
+        "no_license": "Votre compte n'a pas encore de licence {{brand}}. Écrivez à {{supportEmail}} pour en obtenir une.",
+        "expired": "Votre licence a expiré. Écrivez à {{supportEmail}} pour la renouveler.",
+        "audience_mismatch": "Cette licence concerne un autre produit.",
+        "unconfigured": "Cette version ne peut pas encore vérifier les licences. Écrivez à {{supportEmail}}.",
+        "invalid": "Votre licence n'a pas pu être vérifiée. Déconnectez-vous puis reconnectez-vous."
+      }
+    },
+    "errors": {
+      "state_mismatch": "Ce lien de connexion ne vient pas de cette app. Recommencez la connexion depuis ici.",
+      "no_pending_sign_in": "Cette connexion a expiré ou a été lancée ailleurs. Recommencez depuis ici.",
+      "exchange_unreachable": "Impossible de joindre Titanium pour terminer la connexion. Vérifiez votre connexion et réessayez.",
+      "invalid_code_verifier": "La connexion n'a pas pu être vérifiée. Recommencez depuis ici.",
+      "token_not_found": "Ce lien a déjà été utilisé ou a expiré. Recommencez la connexion.",
+      "app_mismatch": "Cette connexion concernait une autre app. Recommencez depuis ici.",
+      "generic": "La connexion n'a pas abouti. Réessayez."
+    }
   }
 }

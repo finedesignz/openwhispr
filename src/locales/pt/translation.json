@@ -1555,6 +1555,10 @@
       "workspace": {
         "description": "Membros, espaços de equipe e chaves de API",
         "label": "Espaço de trabalho"
+      },
+      "titaniumAccount": {
+        "label": "Conta Titanium",
+        "description": "Login e licença"
       }
     },
     "title": "Configurações"
@@ -5080,5 +5084,41 @@
     "permissionDenied": "Negada",
     "permissionRestricted": "Restrita",
     "permissionNotDetermined": "Não solicitada"
+  },
+  "titaniumAccount": {
+    "title": "Conta Titanium",
+    "description": "Entre com sua conta Titanium Labs para usar o {{brand}} com nossos servidores de transcrição.",
+    "signedInAs": "Conectado",
+    "signOut": "Sair",
+    "signIn": "Entrar",
+    "signInAgain": "Reiniciar login",
+    "signedOut": {
+      "label": "Não conectado",
+      "description": "O login abre no seu navegador e volta para cá quando terminar.",
+      "pending": "Conclua o login no navegador. Esta página atualiza quando você voltar."
+    },
+    "license": {
+      "label": "Licença",
+      "active": "Ativa, sem vencimento",
+      "activeUntil": "Ativa até {{date}}",
+      "statusActive": "Ativa",
+      "statusNone": "Sem licença",
+      "reasons": {
+        "no_license": "Sua conta ainda não tem licença do {{brand}}. Escreva para {{supportEmail}} para obter uma.",
+        "expired": "Sua licença expirou. Escreva para {{supportEmail}} para renovar.",
+        "audience_mismatch": "Esta licença é de outro produto.",
+        "unconfigured": "Esta versão ainda não consegue verificar licenças. Escreva para {{supportEmail}}.",
+        "invalid": "Não foi possível verificar sua licença. Saia e entre novamente."
+      }
+    },
+    "errors": {
+      "state_mismatch": "Esse link de login não veio deste app. Comece o login novamente por aqui.",
+      "no_pending_sign_in": "Esse login expirou ou foi iniciado em outro lugar. Comece novamente por aqui.",
+      "exchange_unreachable": "Não foi possível falar com a Titanium para concluir. Verifique sua conexão e tente de novo.",
+      "invalid_code_verifier": "Não foi possível verificar o login. Comece novamente por aqui.",
+      "token_not_found": "Esse link já foi usado ou expirou. Comece o login novamente.",
+      "app_mismatch": "Esse login era de outro app. Comece novamente por aqui.",
+      "generic": "O login não foi concluído. Tente de novo."
+    }
   }
 }

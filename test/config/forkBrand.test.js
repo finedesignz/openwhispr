@@ -62,6 +62,11 @@ function* sourceFiles(dir) {
 }
 
 test("runtime code has no OpenWhispr-hosted URL (fork config is the only place for hosts)", () => {
+  const allowed = fs
+    .readFileSync(path.join(ROOT, "src", "helpers", "productHelpFallback.js"), "utf8")
+    .split("\n")
+    .filter((line) => line.includes("fork-allow-upstream-link"));
+  assert.equal(allowed.length, 1, "exactly one sanctioned upstream link");
   const offenders = [];
   for (const file of [
     path.join(ROOT, "main.js"),
@@ -70,6 +75,8 @@ test("runtime code has no OpenWhispr-hosted URL (fork config is the only place f
   ]) {
     const lines = fs.readFileSync(file, "utf8").split("\n");
     lines.forEach((line, index) => {
+      // The one sanctioned exception: help citation links (productHelpFallback.js).
+      if (line.includes("fork-allow-upstream-link")) return;
       if (HOSTED_URL.test(line)) offenders.push(`${path.relative(ROOT, file)}:${index + 1}`);
     });
   }
