@@ -197,3 +197,23 @@ test("only <scheme>://auth/callback is a Titanium callback", () => {
   assert.equal(session.isCallbackUrl("titaniumwhisper://notes/abc"), false);
   assert.equal(session.isCallbackUrl("openwhispr://auth/callback?act=1"), false);
 });
+
+test("an exchange that finishes after a newer sign-in or a sign-out is ignored", async () => {
+  let release;
+  const gate = new Promise((resolve) => (release = resolve));
+  const { session, opened } = makeSession({
+    exchange: () => ({ body: { licenseKey: null, email: "old@b.test" } }),
+  });
+  const slowFetch = session.fetchImpl;
+  session.fetchImpl = async (...args) => {
+    await gate;
+    return slowFetch(...args);
+  };
+  await session.startSignIn();
+  const inFlight = session.handleCallback(callbackFor(opened[0], { act: "act_old" }));
+  session.signOut();
+  release();
+  assert.deepEqual(await inFlight, { ok: false, error: "superseded" });
+  assert.equal(session.getState().signedIn, false);
+  assert.equal(fs.existsSync(session.filePath), false);
+});

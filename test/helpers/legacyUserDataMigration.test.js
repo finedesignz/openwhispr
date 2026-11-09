@@ -107,3 +107,42 @@ test("a failed copy leaves no partial profile behind", () => {
   assert.ok(!fs.existsSync(target));
   assert.ok(!fs.existsSync(`${target}.migrating`));
 });
+
+test("a failed copy is retried on the next launch, setting the fresh profile aside", () => {
+  const appData = tmpAppData();
+  write(path.join(appData, "OpenWhispr", ".env"), "A=1\n");
+  const target = path.join(appData, "Titanium Whisper");
+  const failingFs = {
+    ...fs,
+    cpSync: () => {
+      throw new Error("file locked");
+    },
+  };
+  const first = migrateLegacyUserData({
+    appDataDir: appData,
+    targetDir: target,
+    legacyNames: ["OpenWhispr"],
+    fsImpl: failingFs,
+  });
+  assert.equal(first.reason, "copy_failed");
+  // The app starts anyway and creates a fresh profile.
+  write(path.join(target, "logs", "app.log"), "fresh");
+
+  const second = migrateLegacyUserData({
+    appDataDir: appData,
+    targetDir: target,
+    legacyNames: ["OpenWhispr"],
+    now: () => new Date(1_700_000_000_000),
+  });
+  assert.equal(second.migrated, true);
+  assert.equal(fs.readFileSync(path.join(target, ".env"), "utf8"), "A=1\n");
+  assert.ok(fs.existsSync(path.join(`${target}.unmigrated-1700000000000`, "logs", "app.log")));
+  assert.ok(!fs.existsSync(`${target}.migration-pending`));
+
+  const third = migrateLegacyUserData({
+    appDataDir: appData,
+    targetDir: target,
+    legacyNames: ["OpenWhispr"],
+  });
+  assert.deepEqual(third, { migrated: false, reason: "target_exists" });
+});

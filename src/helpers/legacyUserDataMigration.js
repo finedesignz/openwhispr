@@ -11,6 +11,7 @@ const fs = require("fs");
 const path = require("path");
 
 const MARKER = ".migrated-from.json";
+const PENDING_SUFFIX = ".migration-pending";
 
 // Chromium/Electron runtime state that must not be copied: singleton locks of a
 // possibly running OpenWhispr, and caches that are rebuilt on demand.
@@ -60,7 +61,19 @@ function migrateLegacyUserData({
   now = () => new Date(),
 }) {
   if (!appDataDir || !targetDir) return { migrated: false, reason: "no_paths" };
-  if (fsImpl.existsSync(targetDir)) return { migrated: false, reason: "target_exists" };
+  const pendingFlag = `${targetDir}${PENDING_SUFFIX}`;
+  if (fsImpl.existsSync(targetDir)) {
+    // A previous launch's copy failed and the app then started with a fresh profile.
+    // Retry: set that fresh profile aside (never delete it) and migrate again.
+    if (!fsImpl.existsSync(pendingFlag) || fsImpl.existsSync(path.join(targetDir, MARKER))) {
+      return { migrated: false, reason: "target_exists" };
+    }
+    try {
+      fsImpl.renameSync(targetDir, `${targetDir}.unmigrated-${now().getTime()}`);
+    } catch (error) {
+      return { migrated: false, reason: "copy_failed", error: error?.message };
+    }
+  }
 
   const legacy = newestLegacyDir(appDataDir, legacyNames, fsImpl);
   if (!legacy) return { migrated: false, reason: "no_legacy" };
@@ -83,13 +96,24 @@ function migrateLegacyUserData({
     );
     // Rename last, so a crash mid-copy never leaves a half-migrated profile in place.
     fsImpl.renameSync(staging, targetDir);
+    try {
+      fsImpl.rmSync(pendingFlag, { force: true });
+    } catch {}
     return { migrated: true, from: legacy.dir };
   } catch (error) {
     try {
       fsImpl.rmSync(staging, { recursive: true, force: true });
     } catch {}
+    // Remember the failure so the next launch retries, even though this launch
+    // goes on to create a fresh profile at targetDir.
+    try {
+      fsImpl.writeFileSync(
+        pendingFlag,
+        JSON.stringify({ from: legacy.dir, error: error?.message })
+      );
+    } catch {}
     return { migrated: false, reason: "copy_failed", error: error?.message };
   }
 }
 
-module.exports = { migrateLegacyUserData, MARKER, SKIP_NAMES };
+module.exports = { migrateLegacyUserData, MARKER, SKIP_NAMES, PENDING_SUFFIX };

@@ -52,6 +52,9 @@ class TitaniumSession extends EventEmitter {
     this.pending = null;
     this.session = null;
     this.lastError = null;
+    // Bumped by every new sign-in and sign-out, so an exchange still in flight from
+    // an older attempt can't install its session afterwards.
+    this.generation = 0;
   }
 
   isConfigured() {
@@ -88,6 +91,7 @@ class TitaniumSession extends EventEmitter {
     const login = new URL("/login", this.config.portalUrl);
     login.searchParams.set("app_id", this.config.appSlug);
     login.searchParams.set("return_url", returnUrl.toString());
+    this.generation += 1;
     this.pending = { state, verifier, expiresAt: this.now() + PENDING_TTL_MS };
     return login.toString();
   }
@@ -114,6 +118,7 @@ class TitaniumSession extends EventEmitter {
     if (!state || state !== pending.state) return this.fail("state_mismatch");
     if (!act) return this.fail(parsed.searchParams.get("error") || "missing_act");
     this.pending = null; // single use, whatever happens next
+    const generation = this.generation;
 
     let body;
     try {
@@ -128,6 +133,7 @@ class TitaniumSession extends EventEmitter {
     } catch (error) {
       return this.fail("exchange_unreachable", error);
     }
+    if (generation !== this.generation) return { ok: false, error: "superseded" };
     if (!body || typeof body.email !== "string" || !body.email) {
       return this.fail("exchange_malformed");
     }
@@ -199,6 +205,7 @@ class TitaniumSession extends EventEmitter {
   }
 
   signOut() {
+    this.generation += 1;
     this.session = null;
     this.pending = null;
     this.lastError = null;
