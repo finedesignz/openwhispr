@@ -3,10 +3,7 @@
   "APP_ID": "com.titaniumlabs.titaniumwhisper",
   "URL_SCHEME": "titaniumwhisper",
   "USER_DATA_DIR": "Titanium Whisper",
-  "LEGACY_USER_DATA_DIRS": [
-    "OpenWhispr",
-    "open-whispr"
-  ],
+  "LEGACY_USER_DATA_DIRS": ["OpenWhispr", "open-whispr"],
   "WINDOWS_TRAY_GUID": "580c76fe-f810-4c10-97bd-380060508a21",
   "API_URL": "",
   "AUTH_URL": "",
