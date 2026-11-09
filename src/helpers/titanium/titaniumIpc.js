@@ -45,6 +45,7 @@ function initTitaniumAuth({ forkConfig, urlScheme, logger }) {
     }
   });
   ipcMain.handle("titanium-auth-sign-out", () => session.signOut());
+  ipcMain.handle("titanium-service-key", (_event, url) => titaniumServiceKeyFor(url));
   return session;
 }
 
@@ -52,4 +53,37 @@ function getTitaniumSession() {
   return session;
 }
 
-module.exports = { initTitaniumAuth, getTitaniumSession };
+function hostOf(url) {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * The signed-in user's license key, but only for a request to one of our own
+ * services (the fork's default STT host, plus TITANIUM.serviceHosts). A Custom
+ * endpoint the user points elsewhere never receives the Titanium credential.
+ */
+function titaniumServiceKeyFor(url, forkConfig = require("../../config/forkConfig")) {
+  const host = hostOf(url);
+  if (!host || !session) return null;
+  const allowed = new Set(
+    [hostOf(forkConfig.DEFAULT_STT?.baseUrl), ...(forkConfig.TITANIUM?.serviceHosts || [])]
+      .map((h) => String(h || "").toLowerCase())
+      .filter(Boolean)
+  );
+  return allowed.has(host) ? session.getLicenseKey() : null;
+}
+
+function _setSessionForTest(value) {
+  session = value;
+}
+
+module.exports = {
+  initTitaniumAuth,
+  getTitaniumSession,
+  titaniumServiceKeyFor,
+  _setSessionForTest,
+};

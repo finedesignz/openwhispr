@@ -787,6 +787,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   titaniumAuthGetState: () => ipcRenderer.invoke("titanium-auth-get-state"),
   titaniumAuthSignIn: () => ipcRenderer.invoke("titanium-auth-sign-in"),
   titaniumAuthSignOut: () => ipcRenderer.invoke("titanium-auth-sign-out"),
+  // License key for one of our own service URLs (null for any other host).
+  getTitaniumServiceKey: (url) => ipcRenderer.invoke("titanium-service-key", url),
   onTitaniumAuthChanged: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on("titanium-auth-changed", listener);

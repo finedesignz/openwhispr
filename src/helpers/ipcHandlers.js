@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const { isRestorablePasteTarget } = require("./windowsPasteTarget");
+const { titaniumServiceKeyFor } = require("./titanium/titaniumIpc");
 const crypto = require("crypto");
 const debugLogger = require("./debugLogger");
 const { ANALYTICS_HISTORY_BACKFILL_VERSION } = require("./analytics");
@@ -7098,7 +7099,8 @@ class IPCHandlers {
               : provider === "xai"
                 ? this.environmentManager.getXaiKey()
                 : route.auth.keyRef === "custom"
-                  ? this.environmentManager.getCustomTranscriptionKey()
+                  ? this.environmentManager.getCustomTranscriptionKey() ||
+                    titaniumServiceKeyFor(endpoint)
                   : route.auth.keyRef === "groq"
                     ? this.environmentManager.getGroqKey()
                     : this.environmentManager.getOpenAIKey();
@@ -9128,7 +9130,9 @@ class IPCHandlers {
               });
             } else {
               await streaming.connect({
-                apiKey: this.environmentManager.getCustomTranscriptionKey(),
+                apiKey:
+                  this.environmentManager.getCustomTranscriptionKey() ||
+                  titaniumServiceKeyFor(options.baseUrl),
                 baseUrl: options.baseUrl,
               });
             }
@@ -10913,13 +10917,18 @@ class IPCHandlers {
           );
 
           const url = new URL(transcriptionUrl);
+          // Fork: a keyless Custom upload to our own STT API carries the user's
+          // Titanium license (titaniumServiceKeyFor checks the host).
+          const authKey =
+            apiKey ||
+            (route.provider === "custom" ? titaniumServiceKeyFor(transcriptionUrl) : null);
           // Mistral authenticates with x-api-key, not Bearer.
-          const headers = apiKey
+          const headers = authKey
             ? route.provider === "mistral"
-              ? { "x-api-key": apiKey }
+              ? { "x-api-key": authKey }
               : route.transport === "http-batch" && route.auth.scheme === "azure-api-key"
-                ? { "api-key": apiKey }
-                : { Authorization: `Bearer ${apiKey}` }
+                ? { "api-key": authKey }
+                : { Authorization: `Bearer ${authKey}` }
             : undefined;
           const data = await postMultipart(url, body, boundary, headers);
 

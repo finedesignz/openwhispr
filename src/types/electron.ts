@@ -2647,6 +2647,7 @@ declare global {
       titaniumAuthGetState?: () => Promise<TitaniumAuthState>;
       titaniumAuthSignIn?: () => Promise<{ started: boolean; error?: string }>;
       titaniumAuthSignOut?: () => Promise<TitaniumAuthState>;
+      getTitaniumServiceKey?: (url: string) => Promise<string | null>;
       onTitaniumAuthChanged?: (callback: (state: TitaniumAuthState) => void) => () => void;
 
       // Auth
