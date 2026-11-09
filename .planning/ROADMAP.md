@@ -5,7 +5,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Fork CI & sync runbook** — CI builds are cloud-disabled, upstream-only jobs off, one green Windows build+test job
+- [x] **Phase 1: Fork CI & sync runbook** — CI builds are cloud-disabled, upstream-only jobs off, one green Windows build+test job
 - [ ] **Phase 2: Titanium Whisper rebrand** — name, identity, icons, links, userData migration
 - [ ] **Phase 3: Titanium sign-in** — browser login → deep link → exchange → offline license in Electron main
 - [ ] **Phase 4: stt-api on Titanium auth** — license-key bearer on stt-api, stable domain, app sends key, language guard
@@ -102,10 +102,10 @@
 
 | Phase | Status | Plans | Progress |
 | ----- | ------ | ----- | -------- |
-| 1     | ○      | 0/0   | 0%       |
-| 2     | ○      | 0/0   | 0%       |
-| 3     | ○      | 0/0   | 0%       |
-| 4     | ○      | 0/0   | 0%       |
+| 1     | ✓      | 1/1   | 100%     |
+| 2     | ◆      | 1/1   | review   |
+| 3     | ◆      | 1/1   | review   |
+| 4     | ◆      | 1/2   | review   |
 | 5     | ○      | 0/0   | 0%       |
 | 6     | ○      | 0/0   | 0%       |
 | 7     | ○      | 0/0   | 0%       |
