@@ -186,7 +186,10 @@ test("Windows without its key listener reports Hold unavailable", async () => {
   );
 
   assert.equal(info.supportsPushToTalk, false);
-  assert.equal(info.pushToTalkUnavailableReason, "OpenWhispr's key listener isn't available.");
+  assert.equal(
+    info.pushToTalkUnavailableReason,
+    "Titanium Whisper's key listener isn't available."
+  );
   assert.equal(info.linuxInputAccessDenied, false);
 });
 
