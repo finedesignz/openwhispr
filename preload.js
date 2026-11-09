@@ -783,6 +783,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getModelCacheRoot: () => ipcRenderer.invoke("get-model-cache-root"),
   openWhisperModelsFolder: () => ipcRenderer.invoke("open-whisper-models-folder"),
   authClearSession: () => ipcRenderer.invoke("auth-clear-session"),
+  // Titanium sign-in (fork): state, start (opens the browser), sign out, change events.
+  titaniumAuthGetState: () => ipcRenderer.invoke("titanium-auth-get-state"),
+  titaniumAuthSignIn: () => ipcRenderer.invoke("titanium-auth-sign-in"),
+  titaniumAuthSignOut: () => ipcRenderer.invoke("titanium-auth-sign-out"),
+  // License key for one of our own service URLs (null for any other host).
+  getTitaniumServiceKey: (url) => ipcRenderer.invoke("titanium-service-key", url),
+  onTitaniumAuthChanged: (callback) => {
+    const listener = (_event, state) => callback(state);
+    ipcRenderer.on("titanium-auth-changed", listener);
+    return () => ipcRenderer.removeListener("titanium-auth-changed", listener);
+  },
   authGetToken: () => ipcRenderer.invoke("auth-get-token"),
   authGetTokenState: () => ipcRenderer.invoke("auth-get-token-state"),
   authSetToken: (token, expectedGeneration) =>

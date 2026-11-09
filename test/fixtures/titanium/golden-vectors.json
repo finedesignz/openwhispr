@@ -1,0 +1,122 @@
+{
+  "$comment": "Golden cross-language test vectors for the Keygen CE key/<payload>.<sig> artifact path. THROWAWAY TEST KEY — never a production signing key. Regenerate with packages/test-vectors/generate.mjs.",
+  "publicKeyHex": "a02f3e752223a69d0653d443a606988d2f5a0bb10c8de91755dd8a7a8241f886",
+  "keygenProductId": "9cdac1ad-0e2d-4d70-9356-91e4d3948304",
+  "vectors": [
+    {
+      "id": "valid-perpetual",
+      "description": "Well-formed key, perpetual (expiry null) — validates.",
+      "input": "key/eyJhY2NvdW50Ijp7ImlkIjoiMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1In0sInByb2R1Y3QiOnsiaWQiOiI5Y2RhYzFhZC0wZTJkLTRkNzAtOTM1Ni05MWU0ZDM5NDgzMDQifSwicG9saWN5Ijp7ImlkIjoicG9saWN5LXV1aWQiLCJkdXJhdGlvbiI6bnVsbH0sInVzZXIiOnsiaWQiOiJ1c2VyLXV1aWQiLCJlbWFpbCI6ImFydGljdWxhdGVkZXNpZ25zQGdtYWlsLmNvbSJ9LCJsaWNlbnNlIjp7ImlkIjoiN2Y3YmI5ZTctYmM0OC00MjY2LTgyYmItNGFkODg5M2Q1ZDc3IiwiY3JlYXRlZCI6IjIwMjYtMDUtMzBUMDA6MDA6MDAuMDAwWiIsImV4cGlyeSI6bnVsbH19.IkRsOgsRz3dDbQ_4bb_2ads5Tt6xHBBpMaQowZHlONa-udHLvXlLQiiY0rYl3a9DyNSPnEtXliRYM8Y6kHcKBA",
+      "expectedOutcome": "valid",
+      "decodedPayload": {
+        "account": {
+          "id": "11111111-2222-3333-4444-555555555555"
+        },
+        "product": {
+          "id": "9cdac1ad-0e2d-4d70-9356-91e4d3948304"
+        },
+        "policy": {
+          "id": "policy-uuid",
+          "duration": null
+        },
+        "user": {
+          "id": "user-uuid",
+          "email": "articulatedesigns@gmail.com"
+        },
+        "license": {
+          "id": "7f7bb9e7-bc48-4266-82bb-4ad8893d5d77",
+          "created": "2026-05-30T00:00:00.000Z",
+          "expiry": null
+        }
+      }
+    },
+    {
+      "id": "valid-future-expiry",
+      "description": "Well-formed key, expiry far in the future — validates.",
+      "input": "key/eyJhY2NvdW50Ijp7ImlkIjoiMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1In0sInByb2R1Y3QiOnsiaWQiOiI5Y2RhYzFhZC0wZTJkLTRkNzAtOTM1Ni05MWU0ZDM5NDgzMDQifSwicG9saWN5Ijp7ImlkIjoicG9saWN5LXV1aWQiLCJkdXJhdGlvbiI6bnVsbH0sInVzZXIiOnsiaWQiOiJ1c2VyLXV1aWQiLCJlbWFpbCI6ImFydGljdWxhdGVkZXNpZ25zQGdtYWlsLmNvbSJ9LCJsaWNlbnNlIjp7ImlkIjoiN2Y3YmI5ZTctYmM0OC00MjY2LTgyYmItNGFkODg5M2Q1ZDc3IiwiY3JlYXRlZCI6IjIwMjYtMDUtMzBUMDA6MDA6MDAuMDAwWiIsImV4cGlyeSI6IjIwMzAtMDEtMDFUMDA6MDA6MDAuMDAwWiJ9fQ.SkZe-dt-xMdXma7y-YbiKCMGK2sTj1a7AKSuFKQSrp09vjGur7gw2Ct141Wr7R25Yl_X3O28PMl47pUqw5HjDA",
+      "expectedOutcome": "valid",
+      "decodedPayload": {
+        "account": {
+          "id": "11111111-2222-3333-4444-555555555555"
+        },
+        "product": {
+          "id": "9cdac1ad-0e2d-4d70-9356-91e4d3948304"
+        },
+        "policy": {
+          "id": "policy-uuid",
+          "duration": null
+        },
+        "user": {
+          "id": "user-uuid",
+          "email": "articulatedesigns@gmail.com"
+        },
+        "license": {
+          "id": "7f7bb9e7-bc48-4266-82bb-4ad8893d5d77",
+          "created": "2026-05-30T00:00:00.000Z",
+          "expiry": "2030-01-01T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "id": "expired",
+      "description": "Well-formed key, expiry in the past — LicenseExpiredError.",
+      "input": "key/eyJhY2NvdW50Ijp7ImlkIjoiMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1In0sInByb2R1Y3QiOnsiaWQiOiI5Y2RhYzFhZC0wZTJkLTRkNzAtOTM1Ni05MWU0ZDM5NDgzMDQifSwicG9saWN5Ijp7ImlkIjoicG9saWN5LXV1aWQiLCJkdXJhdGlvbiI6bnVsbH0sInVzZXIiOnsiaWQiOiJ1c2VyLXV1aWQiLCJlbWFpbCI6ImFydGljdWxhdGVkZXNpZ25zQGdtYWlsLmNvbSJ9LCJsaWNlbnNlIjp7ImlkIjoiN2Y3YmI5ZTctYmM0OC00MjY2LTgyYmItNGFkODg5M2Q1ZDc3IiwiY3JlYXRlZCI6IjIwMjYtMDUtMzBUMDA6MDA6MDAuMDAwWiIsImV4cGlyeSI6IjIwMjAtMDEtMDFUMDA6MDA6MDAuMDAwWiJ9fQ.xwrPiIxD5ADASZj_s8i7foEqhOnmMhulc736ovytsN7BnVRSAdeFRU0hZl5jZXbvpKf6vRTejii2nnrAlyDRCQ",
+      "expectedOutcome": "expired",
+      "decodedPayload": {
+        "account": {
+          "id": "11111111-2222-3333-4444-555555555555"
+        },
+        "product": {
+          "id": "9cdac1ad-0e2d-4d70-9356-91e4d3948304"
+        },
+        "policy": {
+          "id": "policy-uuid",
+          "duration": null
+        },
+        "user": {
+          "id": "user-uuid",
+          "email": "articulatedesigns@gmail.com"
+        },
+        "license": {
+          "id": "7f7bb9e7-bc48-4266-82bb-4ad8893d5d77",
+          "created": "2026-05-30T00:00:00.000Z",
+          "expiry": "2020-01-01T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "id": "wrong-product",
+      "description": "Key minted for another product — cross-app replay guard (TS: LicenseAudienceMismatchError, Py: LicenseTamperedError).",
+      "input": "key/eyJhY2NvdW50Ijp7ImlkIjoiMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1In0sInByb2R1Y3QiOnsiaWQiOiI5YTUxM2I3MS0zZDk2LTQyNGUtODY4My1mMDg5ZjI5Y2Q3MjkifSwicG9saWN5Ijp7ImlkIjoicG9saWN5LXV1aWQiLCJkdXJhdGlvbiI6bnVsbH0sInVzZXIiOnsiaWQiOiJ1c2VyLXV1aWQiLCJlbWFpbCI6ImFydGljdWxhdGVkZXNpZ25zQGdtYWlsLmNvbSJ9LCJsaWNlbnNlIjp7ImlkIjoiN2Y3YmI5ZTctYmM0OC00MjY2LTgyYmItNGFkODg5M2Q1ZDc3IiwiY3JlYXRlZCI6IjIwMjYtMDUtMzBUMDA6MDA6MDAuMDAwWiIsImV4cGlyeSI6bnVsbH19.VaVOEHqSQeDNjNdV--g5jEeA8OO6jQQCLBfCQPmjb9z3y-jYHsQND35rzI4djRGKkAHy-j2YZp8nsTyzHEf-Aw",
+      "expectedOutcome": "wrong_product",
+      "decodedPayload": {
+        "account": {
+          "id": "11111111-2222-3333-4444-555555555555"
+        },
+        "product": {
+          "id": "9a513b71-3d96-424e-8683-f089f29cd729"
+        },
+        "policy": {
+          "id": "policy-uuid",
+          "duration": null
+        },
+        "user": {
+          "id": "user-uuid",
+          "email": "articulatedesigns@gmail.com"
+        },
+        "license": {
+          "id": "7f7bb9e7-bc48-4266-82bb-4ad8893d5d77",
+          "created": "2026-05-30T00:00:00.000Z",
+          "expiry": null
+        }
+      }
+    },
+    {
+      "id": "tampered-signature",
+      "description": "Payload byte flipped after signing — Ed25519 signature no longer matches.",
+      "input": "key/eyJhY2AvdW50Ijp7ImlkIjoiMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1In0sInByb2R1Y3QiOnsiaWQiOiI5Y2RhYzFhZC0wZTJkLTRkNzAtOTM1Ni05MWU0ZDM5NDgzMDQifSwicG9saWN5Ijp7ImlkIjoicG9saWN5LXV1aWQiLCJkdXJhdGlvbiI6bnVsbH0sInVzZXIiOnsiaWQiOiJ1c2VyLXV1aWQiLCJlbWFpbCI6ImFydGljdWxhdGVkZXNpZ25zQGdtYWlsLmNvbSJ9LCJsaWNlbnNlIjp7ImlkIjoiN2Y3YmI5ZTctYmM0OC00MjY2LTgyYmItNGFkODg5M2Q1ZDc3IiwiY3JlYXRlZCI6IjIwMjYtMDUtMzBUMDA6MDA6MDAuMDAwWiIsImV4cGlyeSI6bnVsbH19.IkRsOgsRz3dDbQ_4bb_2ads5Tt6xHBBpMaQowZHlONa-udHLvXlLQiiY0rYl3a9DyNSPnEtXliRYM8Y6kHcKBA",
+      "expectedOutcome": "tampered",
+      "decodedPayload": null
+    }
+  ]
+}

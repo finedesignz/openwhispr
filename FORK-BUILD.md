@@ -1,11 +1,14 @@
-# Signed fork build (finedesignz/openwhispr)
+# Signed fork build: Titanium Whisper (finedesignz/openwhispr)
 
-`electron-builder.fork.json` extends the upstream `electron-builder.json` and overrides only:
+`electron-builder.fork.json` extends the upstream `electron-builder.json` and overrides:
 
 - `win.azureSignOptions`: Titanium Labs LLC, Azure Trusted Signing (account `titaniumlabs-signing`, profile `TitaniumLabsLLC`).
+- `appId` `com.titaniumlabs.titaniumwhisper`, `productName` "Titanium Whisper", URL scheme `titaniumwhisper`, NSIS shortcut and uninstall names (values mirror `src/config/fork.config.json`; `test/config/forkBrand.test.js` keeps them in sync).
 - `publish`: GitHub `finedesignz/openwhispr`.
 
-`appId` is unchanged (`com.gizmolabs.openwhispr`), so the installer upgrades an existing install in place and keeps user data.
+`electron-builder.fork-unsigned.json` is the same identity without signing (CI pull requests, local test builds).
+
+The appId differs from OpenWhispr's, so Titanium Whisper installs beside OpenWhispr rather than over it. On first launch it copies the OpenWhispr profile (settings, history, notes, keys) into its own userData folder (`src/helpers/legacyUserDataMigration.js`); OpenWhispr's folder is left untouched.
 
 ## Build (Node 24)
 
@@ -20,10 +23,10 @@ npm run build:renderer
 npx electron-builder --win nsis --publish never --config electron-builder.fork.json
 ```
 
-Output: `dist/OpenWhispr Setup <version>.exe`. Signing happens during bundling. Verify with `Get-AuthenticodeSignature` on the installer and on `dist/win-unpacked/OpenWhispr.exe` (Status Valid, CN=Titanium Labs LLC). Delete `dist/win-unpacked` after any failed signed build.
+Output: `dist/Titanium Whisper Setup <version>.exe`. Signing happens during bundling. Verify with `Get-AuthenticodeSignature` on the installer and on `dist/win-unpacked/Titanium Whisper.exe` (Status Valid, CN=Titanium Labs LLC). Delete `dist/win-unpacked` after any failed signed build.
 
 ## Release
 
-Publish to `finedesignz/openwhispr` as a non-draft release marked latest, with `latest.yml`, the installer and its `.blockmap`. Asset names must match `latest.yml`, which uses dashes (`OpenWhispr-Setup-<version>.exe`), so upload renamed copies. The app's updater reads the build-generated `app-update.yml` and checks this repo.
+Publish to `finedesignz/openwhispr` as a non-draft release marked latest, with `latest.yml`, the installer and its `.blockmap`. Asset names must match `latest.yml`, which uses dashes (`Titanium-Whisper-Setup-<version>.exe`), so upload renamed copies. The app's updater reads the build-generated `app-update.yml` and checks this repo.
 
 Note: `download:brand-fonts` needs access to a private upstream release; without it the app uses its bundled font.

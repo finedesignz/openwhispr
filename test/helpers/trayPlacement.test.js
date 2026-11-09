@@ -7,7 +7,8 @@ const vm = require("node:vm");
 // Spelled out rather than imported: a new GUID resets every user's saved tray
 // position, so changing either should fail here.
 const MACOS_TRAY_GUID = "eb809902-04b5-5b08-b12a-f81d6f27e185";
-const WINDOWS_TRAY_GUID = "9afd9bd5-53da-42ef-8334-6e2b494c66fe";
+// The fork (Titanium Whisper) owns its own Windows GUID in src/config/fork.config.json.
+const WINDOWS_TRAY_GUID = "580c76fe-f810-4c10-97bd-380060508a21";
 const trayPath = path.join(__dirname, "../../src/helpers/tray.js");
 const traySource = fs.readFileSync(trayPath, "utf8");
 
@@ -40,6 +41,7 @@ async function createTrayOn(platform, { channel = "production", metadata = {} } 
     "./debugLogger": { error: (...args) => calls.push(["error", ...args]) },
     "./dockManager": {},
     "./i18nMain": { i18nMain: { t: (key) => key } },
+    "../config/forkConfig": require("../../src/config/forkConfig"),
   };
   const loadedModule = { exports: {} };
   vm.runInNewContext(

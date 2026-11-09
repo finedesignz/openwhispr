@@ -72,16 +72,22 @@
 
 ## Traceability
 
-| Requirement        | Phase   | Status  |
-| ------------------ | ------- | ------- |
-| CI-01..CI-05       | Phase 1 | Pending |
-| OPS-01             | Phase 1 | Pending |
-| BRAND-01..BRAND-07 | Phase 2 | Pending |
-| AUTH-01..AUTH-06   | Phase 3 | Pending |
-| STT-01..STT-04     | Phase 4 | Pending |
-| STT-05..STT-07     | Phase 5 | Pending |
-| FEAT-01..FEAT-03   | Phase 6 | Pending |
-| FEAT-04..FEAT-06   | Phase 7 | Pending |
+| Requirement  | Phase   | Status                                                                                                     |
+| ------------ | ------- | ---------------------------------------------------------------------------------------------------------- |
+| CI-01..CI-05 | Phase 1 | Complete (PR #10, merged 2026-11-09)                                                                       |
+| OPS-01       | Phase 1 | Complete (PR #10, `docs/UPSTREAM-SYNC.md`)                                                                 |
+| BRAND-01..06 | Phase 2 | In review                                                                                                  |
+| BRAND-07     | Phase 2 | In review (sidecars + CONTRIBUTING); NixOS info left upstream: Linux out of scope                          |
+| AUTH-01      | Phase 3 | Blocked: owner provisions `titanium-whisper` in Titanium, allows `titaniumwhisper://auth`, sets product id |
+| AUTH-02..04  | Phase 3 | In review (AUTH-04 as a separate `useTitaniumAuth`; `useAuth` stays the cloud session)                     |
+| AUTH-05      | Phase 6 | Moved: plan lookup needs a server we own (portal token can't ship in the app)                              |
+| AUTH-06      | Phase 3 | In review                                                                                                  |
+| STT-01       | Phase 4 | In review (stt-api PR); deploy needs TITANIUM_KEYGEN_* env on the stt-api Coolify app                      |
+| STT-02, 04   | Phase 4 | In review                                                                                                  |
+| STT-03       | Phase 4 | Blocked: owner DNS + Coolify domain for stt-api                                                            |
+| STT-05..07   | Phase 5 | Pending                                                                                                    |
+| FEAT-01..03  | Phase 6 | Pending                                                                                                    |
+| FEAT-04..06  | Phase 7 | Pending (FEAT-04 blocked on titanium-licensing IDP-32)                                                     |
 
 **Coverage:**
 

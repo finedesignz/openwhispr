@@ -70,6 +70,13 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
   const sidebarItems: SidebarItem<SettingsSectionType>[] = useMemo(() => {
     const items: SidebarItem<SettingsSectionType>[] = [
       {
+        id: "titaniumAccount",
+        label: t("settingsModal.sections.titaniumAccount.label"),
+        icon: UserCircle,
+        description: t("settingsModal.sections.titaniumAccount.description"),
+        group: t("settingsModal.groups.account"),
+      },
+      {
         id: "account",
         label: t("settingsModal.sections.account.label"),
         icon: UserCircle,
@@ -142,12 +149,14 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
     ];
     const cloudOnly = new Set<SettingsSectionType>(["account", "plansBilling", "workspace"]);
     return items.filter((item) =>
-      CLOUD_ENABLED ? isSignedIn || item.id !== "workspace" : !cloudOnly.has(item.id)
+      CLOUD_ENABLED
+        ? item.id !== "titaniumAccount" && (isSignedIn || item.id !== "workspace")
+        : !cloudOnly.has(item.id)
     );
   }, [t, isSignedIn]);
 
   const resolveSection = (section: string | undefined): SettingsSectionType => {
-    if (!section) return CLOUD_ENABLED ? "account" : "general";
+    if (!section) return CLOUD_ENABLED ? "account" : "titaniumAccount";
     return gateSettingsSection(
       (SECTION_ALIASES[section] ?? section) as SettingsSectionType,
       CLOUD_ENABLED

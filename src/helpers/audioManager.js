@@ -2720,6 +2720,20 @@ registerProcessor("pcm-streaming-processor", PCMStreamingProcessor);
         "transcription"
       );
 
+      // Fork: with no key of their own, signed-in users reach our STT API with their
+      // Titanium license (main only hands it out for our own hosts). Not cached, so
+      // signing in or out takes effect on the next request.
+      if (!apiKey) {
+        try {
+          const titaniumKey = await window.electronAPI.getTitaniumServiceKey?.(
+            s.cloudTranscriptionBaseUrl || ""
+          );
+          if (titaniumKey) return titaniumKey;
+        } catch {
+          // Signed out or unavailable: fall through to an unauthenticated request.
+        }
+      }
+
       // For custom, we allow null/empty - the endpoint may not require auth
       if (!apiKey) {
         apiKey = null;
