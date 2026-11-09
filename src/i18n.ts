@@ -2,6 +2,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { PROMPTS_BY_LOCALE } from "./locales/prompts";
 import { TRANSLATIONS_BY_LOCALE } from "./locales/translations";
+import { BRAND_NAME, SUPPORT_EMAIL } from "./config/forkRuntime";
 
 export const SUPPORTED_UI_LANGUAGES = [
   "en",
@@ -111,6 +112,9 @@ void i18n.use(initReactI18next).init({
   defaultNS: "translation",
   interpolation: {
     escapeValue: false,
+    // Product name and support address come from the fork config, so locale
+    // strings say {{brand}} / {{supportEmail}} instead of a hardcoded name.
+    defaultVariables: { brand: BRAND_NAME, supportEmail: SUPPORT_EMAIL },
   },
   returnEmptyString: true,
   returnNull: false,

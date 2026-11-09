@@ -255,11 +255,16 @@ jobs:
 
       - name: Build and Sign Application
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] || { [ "${{ github.repository }}" != "OpenWhispr/openwhispr" ] && [ -z "$AZURE_CLIENT_ID" ]; }; then
-            # PRs, and forks without signing credentials, build unsigned.
+          if [ "${{ github.repository }}" != "OpenWhispr/openwhispr" ]; then
+            # The fork builds as Titanium Whisper: signed when Azure credentials are
+            # present on a push, unsigned for PRs and when they are not.
+            if [ "${{ github.event_name }}" = "pull_request" ] || [ -z "$AZURE_CLIENT_ID" ]; then
+              npm run build:win -- --publish never --config electron-builder.fork-unsigned.json
+            else
+              npm run build:win -- --publish never --config electron-builder.fork.json
+            fi
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             npm run build:win -- --publish never --config electron-builder.unsigned-win.json
-          elif [ "${{ github.repository }}" != "OpenWhispr/openwhispr" ]; then
-            npm run build:win -- --publish never --config electron-builder.fork.json
           else
             npm run build:win -- --publish never
           fi

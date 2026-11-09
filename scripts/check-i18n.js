@@ -27,10 +27,16 @@ function flatten(obj, prefix = "") {
   return out;
 }
 
+// Fork brand variables (src/i18n.ts, src/helpers/i18nMain.js defaultVariables) always
+// resolve, so a translation may use or omit them independently of the base string.
+const DEFAULT_VARIABLES = new Set(["brand", "supportEmail"]);
+
 function getPlaceholders(value) {
   if (typeof value !== "string") return [];
   const matches = value.match(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g) || [];
-  return [...new Set(matches.map((match) => match.replace(/\{\{|\}\}/g, "").trim()))].sort();
+  return [...new Set(matches.map((match) => match.replace(/\{\{|\}\}/g, "").trim()))]
+    .filter((name) => !DEFAULT_VARIABLES.has(name))
+    .sort();
 }
 
 function arraysEqual(a, b) {

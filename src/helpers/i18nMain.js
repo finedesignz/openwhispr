@@ -1,4 +1,5 @@
 const i18next = require("i18next");
+const { BRAND_NAME, SUPPORT_EMAIL } = require("../config/forkConfig");
 
 const enTranslation = require("../locales/en/translation.json");
 const arTranslation = require("../locales/ar/translation.json");
@@ -121,6 +122,8 @@ void i18nMain.init({
   defaultNS: "translation",
   interpolation: {
     escapeValue: false,
+    // Same brand variables as the renderer (src/i18n.ts), from the fork config.
+    defaultVariables: { brand: BRAND_NAME, supportEmail: SUPPORT_EMAIL },
   },
   returnEmptyString: false,
   returnNull: false,

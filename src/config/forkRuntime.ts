@@ -25,3 +25,4 @@ export const DEFAULT_STT = fork.DEFAULT_STT;
 export const CLOUD_ENABLED = Boolean(API_URL && AUTH_URL);
 export const REPO_URL = strip(fork.REPO_URL || "");
 export const COMMUNITY_URL = strip(fork.COMMUNITY_URL || "");
+export const URL_SCHEME = fork.URL_SCHEME;

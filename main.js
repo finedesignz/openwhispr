@@ -44,12 +44,15 @@ try {
 }
 
 const VALID_CHANNELS = new Set(["development", "staging", "production"]);
+// Fork identity (Titanium Whisper): app id, URL scheme and userData folder come from
+// src/config/fork.config.json so the build config and the runtime agree.
+const FORK_IDENTITY = require("./src/config/forkConfig");
 const DEFAULT_OAUTH_PROTOCOL_BY_CHANNEL = {
-  development: "openwhispr-dev",
-  staging: "openwhispr-staging",
-  production: "openwhispr",
+  development: `${FORK_IDENTITY.URL_SCHEME}-dev`,
+  staging: `${FORK_IDENTITY.URL_SCHEME}-staging`,
+  production: FORK_IDENTITY.URL_SCHEME,
 };
-const BASE_WINDOWS_APP_ID = "com.gizmolabs.openwhispr";
+const BASE_WINDOWS_APP_ID = FORK_IDENTITY.APP_ID;
 const DEFAULT_AUTH_BRIDGE_PORT = 5199;
 
 function isElectronBinaryExec() {
@@ -85,10 +88,25 @@ process.env.OPENWHISPR_CHANNEL = APP_CHANNEL;
 
 function configureChannelUserDataPath() {
   if (APP_CHANNEL === "production") {
+    const userDataPath = path.join(app.getPath("appData"), FORK_IDENTITY.USER_DATA_DIR);
+    // First launch after switching from OpenWhispr: copy its profile before anything
+    // (dotenv, SQLite, safeStorage) opens the new folder.
+    const migration = require("./src/helpers/legacyUserDataMigration").migrateLegacyUserData({
+      appDataDir: app.getPath("appData"),
+      targetDir: userDataPath,
+      legacyNames: FORK_IDENTITY.LEGACY_USER_DATA_DIRS,
+    });
+    app.setPath("userData", userDataPath);
+    if (migration.migrated || migration.reason === "copy_failed") {
+      process.env.TW_USERDATA_MIGRATION = JSON.stringify(migration);
+    }
     return;
   }
 
-  const isolatedPath = path.join(app.getPath("appData"), `OpenWhispr-${APP_CHANNEL}`);
+  const isolatedPath = path.join(
+    app.getPath("appData"),
+    `${FORK_IDENTITY.USER_DATA_DIR}-${APP_CHANNEL}`
+  );
   app.setPath("userData", isolatedPath);
 }
 
@@ -266,8 +284,8 @@ if (!gotSingleInstanceLock) {
 const isLiveWindow = (window) => window && !window.isDestroyed();
 
 // Ensure macOS menus use the proper casing for the app name
-if (process.platform === "darwin" && app.getName() !== "OpenWhispr") {
-  app.setName("OpenWhispr");
+if (process.platform === "darwin" && app.getName() !== FORK_IDENTITY.BRAND_NAME) {
+  app.setName(FORK_IDENTITY.BRAND_NAME);
 }
 
 // Add global error handling for uncaught exceptions
@@ -453,6 +471,10 @@ function initializeCoreManagers() {
 
   debugLogger = require("./src/helpers/debugLogger");
   debugLogger.ensureFileLogging();
+  if (process.env.TW_USERDATA_MIGRATION) {
+    // Paths only; the migration never reads file contents.
+    debugLogger.info("Legacy userData migration", JSON.parse(process.env.TW_USERDATA_MIGRATION));
+  }
   if (process.platform === "linux") {
     // The compositing mode is settled once the GPU process has reported its info; a GPU
     // process crash can still drop it to software later, logged below.
@@ -1108,7 +1130,7 @@ function startAuthBridgeServer() {
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(
-      "<html><body><h3>OpenWhispr sign-in complete.</h3><p>You can close this tab.</p></body></html>"
+      `<html><body><h3>${FORK_IDENTITY.BRAND_NAME} sign-in complete.</h3><p>You can close this tab.</p></body></html>`
     );
   });
 
