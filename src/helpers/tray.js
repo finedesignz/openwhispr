@@ -8,7 +8,9 @@ const { windowsTrayIdentity } = require("../../package.json");
 // Permanent identity for signed production Windows builds; keep across releases.
 // Windows binds an unsigned executable's GUID to its path, so only builds from the
 // signed config, which sets windowsTrayIdentity, may use it.
-const WINDOWS_PRODUCTION_TRAY_GUID = "9afd9bd5-53da-42ef-8334-6e2b494c66fe";
+// The fork has its own app id, so it owns its own GUID (fork.config.json); sharing
+// upstream's would collide with an OpenWhispr install signed by another publisher.
+const WINDOWS_PRODUCTION_TRAY_GUID = require("../config/forkConfig").WINDOWS_TRAY_GUID;
 
 // macOS saves the menu-bar position under this GUID, so changing it resets every
 // user's placement. Electron lowercases the GUID before handing it to macOS, so

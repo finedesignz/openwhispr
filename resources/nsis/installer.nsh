@@ -8,7 +8,8 @@
 ; scoped inbound BLOCK rule suppresses the prompt and closes the port to the
 ; network; loopback is never filtered, so transcription is unaffected.
 ; netsh needs elevation — per-user installs skip this silently.
-!define SHERPA_FIREWALL_RULE "OpenWhispr Local Transcription Server (sherpa-onnx)"
+; Named after the product, so a side-by-side OpenWhispr install keeps its own rule.
+!define SHERPA_FIREWALL_RULE "${PRODUCT_NAME} Local Transcription Server (sherpa-onnx)"
 
 ; Electron writes the launch-at-login entry itself, so nothing in the generated
 ; uninstaller knows to remove it, and Windows keeps listing a startup item that
@@ -34,14 +35,15 @@
   ; Guarded by isUpdated so an in-place update does not silently turn launch at
   ; login off for a user who had enabled it.
   ${ifNot} ${isUpdated}
-    !insertmacro DeleteAutoStartEntry "com.gizmolabs.openwhispr"
-    !insertmacro DeleteAutoStartEntry "com.gizmolabs.openwhispr.staging"
-    !insertmacro DeleteAutoStartEntry "com.gizmolabs.openwhispr.development"
+    ; APP_ID is the electron-builder appId, so a fork removes only its own entries.
+    !insertmacro DeleteAutoStartEntry "${APP_ID}"
+    !insertmacro DeleteAutoStartEntry "${APP_ID}.staging"
+    !insertmacro DeleteAutoStartEntry "${APP_ID}.development"
     nsExec::ExecToLog 'netsh advfirewall firewall delete rule name="${SHERPA_FIREWALL_RULE}"'
     StrCpy $0 "$PROFILE\.cache\openwhispr\models"
     IfFileExists "$0\*.*" 0 +3
       RMDir /r "$0"
-      DetailPrint "Removed OpenWhispr cached models"
+      DetailPrint "Removed ${PRODUCT_NAME} cached models"
     StrCpy $1 "$PROFILE\.cache\openwhispr"
     RMDir "$1"
   ${endIf}

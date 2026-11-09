@@ -39,6 +39,21 @@ import type {
 
 export type LocalTranscriptionProvider = "whisper" | "nvidia" | "cohere";
 
+/** Titanium sign-in state from the main process (src/helpers/titanium/titaniumSession.js). */
+export interface TitaniumAuthState {
+  configured: boolean;
+  signedIn: boolean;
+  email: string | null;
+  signedInAt: string | null;
+  licensed: boolean;
+  license: { id: string; expiry: string | null; policyId: string | null } | null;
+  /** Why there is no usable license: signed_out, no_license, expired, audience_mismatch, unconfigured, tampered. */
+  reason: string | null;
+  pending: boolean;
+  /** Last sign-in failure code (state_mismatch, exchange_unreachable, ...), if any. */
+  error: string | null;
+}
+
 export interface MainWindowInputRegion {
   viewportWidth: number;
   viewportHeight: number;
@@ -2627,6 +2642,13 @@ declare global {
       // Settings, which otherwise looks like a toggle that will not stick.
       getAutoStartEnabled?: () => Promise<{ enabled: boolean; requiresApproval: boolean }>;
       setAutoStartEnabled?: (enabled: boolean) => Promise<{ success: boolean; error?: string }>;
+
+      // Titanium sign-in (fork)
+      titaniumAuthGetState?: () => Promise<TitaniumAuthState>;
+      titaniumAuthSignIn?: () => Promise<{ started: boolean; error?: string }>;
+      titaniumAuthSignOut?: () => Promise<TitaniumAuthState>;
+      getTitaniumServiceKey?: (url: string) => Promise<string | null>;
+      onTitaniumAuthChanged?: (callback: (state: TitaniumAuthState) => void) => () => void;
 
       // Auth
       authClearSession?: () => Promise<{

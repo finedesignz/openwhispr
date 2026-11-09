@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { BRAND_NAME } = require("../../src/config/forkConfig");
 const LOCALES = ["ar", "de", "en", "es", "fr", "it", "ja", "pt", "ru", "zh-CN", "zh-TW"];
 // Foundation spec §5.5: the codes every connector must word itself.
 const REQUIRED = [
@@ -116,7 +117,9 @@ test("a repository main couldn't find among those it read has its own copy, in e
     const copy = connectorsCopy(locale);
     for (const scope of ["approval", "toolStatus"]) {
       const shown = connectorErrorText(t, scope, "github", "repo_unlisted");
-      assert.equal(shown, copy[scope].errors.github.repo_unlisted, `${locale} ${scope}`);
+      // The raw locale string names the product as {{brand}} (a default variable).
+      const expected = copy[scope].errors.github.repo_unlisted.replaceAll("{{brand}}", BRAND_NAME);
+      assert.equal(shown, expected, `${locale} ${scope}`);
       // It may be installed after all, so it never reads as "not installed".
       assert.notEqual(shown, copy[scope].errors.github.not_installed, `${locale} ${scope}`);
       assert.notEqual(shown, copy[scope].errors.github.generic, `${locale} ${scope}`);

@@ -64,7 +64,7 @@ jobs:
 
   build-linux:
     needs: quality
-    if: needs.quality.outputs.build == 'true'
+    if: github.repository == 'OpenWhispr/openwhispr' && (needs.quality.outputs.build == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -149,7 +149,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           # Forks and Dependabot get no GH_TOKEN; github.token can't read the private font release.
           BRAND_FONTS_REQUIRED: ${{ secrets.GH_TOKEN && '1' || '0' }}
-          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL || 'https://auth.openwhispr.com' }}
+          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL }}
           VITE_OPENWHISPR_API_URL: ${{ vars.VITE_OPENWHISPR_API_URL }}
           VITE_OPENWHISPR_OAUTH_CALLBACK_URL: ${{ vars.VITE_OPENWHISPR_OAUTH_CALLBACK_URL }}
 
@@ -255,7 +255,15 @@ jobs:
 
       - name: Build and Sign Application
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.repository }}" != "OpenWhispr/openwhispr" ]; then
+            # The fork builds as Titanium Whisper: signed when Azure credentials are
+            # present on a push, unsigned for PRs and when they are not.
+            if [ "${{ github.event_name }}" = "pull_request" ] || [ -z "$AZURE_CLIENT_ID" ]; then
+              npm run build:win -- --publish never --config electron-builder.fork-unsigned.json
+            else
+              npm run build:win -- --publish never --config electron-builder.fork.json
+            fi
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             npm run build:win -- --publish never --config electron-builder.unsigned-win.json
           else
             npm run build:win -- --publish never
@@ -263,12 +271,18 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
-          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL || 'https://auth.openwhispr.com' }}
+          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL }}
           VITE_OPENWHISPR_API_URL: ${{ vars.VITE_OPENWHISPR_API_URL }}
           VITE_OPENWHISPR_OAUTH_CALLBACK_URL: ${{ vars.VITE_OPENWHISPR_OAUTH_CALLBACK_URL }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Fork smoke check
+        # Fails the build if the packaged runtime-env.json would start with the
+        # OpenWhispr hosted cloud on, or the default STT endpoint is not ours.
+        if: github.repository != 'OpenWhispr/openwhispr'
+        run: node scripts/fork-smoke.js
 
       - name: Upload Artifacts
         if: github.event_name != 'pull_request'
@@ -280,7 +294,7 @@ jobs:
 
   build-macos:
     needs: quality
-    if: needs.quality.outputs.build == 'true'
+    if: github.repository == 'OpenWhispr/openwhispr' && (needs.quality.outputs.build == 'true')
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -402,7 +416,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           # Forks and Dependabot get no GH_TOKEN; github.token can't read the private font release.
           BRAND_FONTS_REQUIRED: ${{ secrets.GH_TOKEN && '1' || '0' }}
-          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL || 'https://auth.openwhispr.com' }}
+          VITE_AUTH_URL: ${{ vars.VITE_AUTH_URL }}
           VITE_OPENWHISPR_API_URL: ${{ vars.VITE_OPENWHISPR_API_URL }}
           VITE_OPENWHISPR_OAUTH_CALLBACK_URL: ${{ vars.VITE_OPENWHISPR_OAUTH_CALLBACK_URL }}
           CSC_IDENTITY_AUTO_DISCOVERY: ${{ github.event_name != 'pull_request' && 'true' || 'false' }}
@@ -453,13 +467,20 @@ jobs:
           LINUX_RESULT: ${{ needs.build-linux.result }}
           WINDOWS_RESULT: ${{ needs.build-windows.result }}
           MACOS_RESULT: ${{ needs.build-macos.result }}
+          # Forks build Windows only; the Linux and macOS jobs run upstream.
+          UPSTREAM: ${{ github.repository == 'OpenWhispr/openwhispr' }}
         run: |
           test "$CHANGES_RESULT" = success
           if [ "$DESKTOP" = true ]; then
             test "$QUALITY_RESULT" = success
             if [ "$BUILD" = true ]; then
-              test "$LINUX_RESULT" = success
               test "$WINDOWS_RESULT" = success
-              test "$MACOS_RESULT" = success
+              if [ "$UPSTREAM" = true ]; then
+                test "$LINUX_RESULT" = success
+                test "$MACOS_RESULT" = success
+              else
+                test "$LINUX_RESULT" = skipped
+                test "$MACOS_RESULT" = skipped
+              fi
             fi
           fi

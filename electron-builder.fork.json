@@ -1,5 +1,12 @@
 {
   "extends": "./electron-builder.json",
+  "appId": "com.titaniumlabs.titaniumwhisper",
+  "productName": "Titanium Whisper",
+  "copyright": "Copyright \u00a9 Titanium Labs LLC. Based on OpenWhispr (MIT).",
+  "protocols": {
+    "name": "Titanium Whisper Protocol",
+    "schemes": ["titaniumwhisper"]
+  },
   "win": {
     "azureSignOptions": {
       "endpoint": "https://eus.codesigning.azure.net/",
@@ -7,6 +14,15 @@
       "codeSigningAccountName": "titaniumlabs-signing",
       "publisherName": "CN=Titanium Labs LLC"
     }
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Titanium Whisper",
+    "uninstallDisplayName": "Titanium Whisper",
+    "include": "resources/nsis/installer.nsh"
   },
   "publish": {
     "provider": "github",

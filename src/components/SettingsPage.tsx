@@ -163,12 +163,16 @@ import EnterpriseCheckoutDialog from "./settings/EnterpriseCheckoutDialog";
 import CreateWorkspaceDialog from "./CreateWorkspaceDialog";
 import ProfileSection from "./settings/ProfileSection";
 import ToneStyleSection from "./settings/ToneStyleSection";
+import TitaniumAccountSection from "./settings/TitaniumAccountSection";
+import { showForkSttLanguageWarning } from "../config/forkSttLanguage";
+import { InfoBox } from "./ui/InfoBox";
 import { formatAmount } from "../utils/formatAmount";
 import { enterpriseProviderName, getTranscriptionProvider } from "../models/ModelRegistry";
 import { useManagedScopeResolution } from "../stores/enterpriseIdentityStore";
 import { supportsLiveTranscriptionPreview } from "../utils/transcriptionPreview";
 
 export type SettingsSectionType =
+  | "titaniumAccount"
   | "account"
   | "plansBilling"
   | "workspace"
@@ -2996,6 +3000,9 @@ export default function SettingsPage({
       case "workspace":
         return <WorkspaceSection initialSubTab={initialSubTab} />;
 
+      case "titaniumAccount":
+        return <TitaniumAccountSection />;
+
       case "toneStyle":
         return (
           <ToneStyleSection
@@ -3301,6 +3308,21 @@ export default function SettingsPage({
                     />
                   </SettingsRow>
                 </SettingsPanelRow>
+                {showForkSttLanguageWarning({
+                  cloudTranscriptionProvider,
+                  cloudTranscriptionBaseUrl,
+                  cloudTranscriptionModel,
+                  preferredLanguage,
+                  useLocalWhisper,
+                }) && (
+                  <SettingsPanelRow>
+                    <InfoBox variant="warning" className="p-3">
+                      <p className="text-[13px] text-foreground">
+                        {t("settings.language.forkSttEnglishOnly")}
+                      </p>
+                    </InfoBox>
+                  </SettingsPanelRow>
+                )}
                 {preferredLanguage === "auto" && (
                   <SettingsPanelRow>
                     <SettingsRow

@@ -16,7 +16,8 @@ const {
   setExecutable,
 } = require("./lib/download-utils");
 
-const REPO = "OpenWhispr/openwhispr";
+// Fork-built helper releases (same tags as upstream). SIDECAR_RELEASE_REPO overrides.
+const REPO = process.env.SIDECAR_RELEASE_REPO || "finedesignz/openwhispr";
 const BIN_DIR = path.join(__dirname, "..", "resources", "bin");
 
 const PLATFORM_CONFIG = {
