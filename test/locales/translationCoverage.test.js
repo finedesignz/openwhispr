@@ -156,9 +156,14 @@ test("every en key is present in every other language", () => {
 test("interpolation variables match en in every language", () => {
   // Compares names, not repeat counts — word order can make a translation
   // reference the same variable a different number of times.
+  // {{brand}} / {{supportEmail}} are fork default variables (src/i18n.ts): a
+  // translation may use them or not, independently of en (scripts/check-i18n.js).
+  const DEFAULT_VARIABLES = new Set(["brand", "supportEmail"]);
   const variables = (value) =>
     typeof value === "string"
-      ? [...new Set([...value.matchAll(INTERPOLATION)].map((m) => m[1]))].sort()
+      ? [...new Set([...value.matchAll(INTERPOLATION)].map((m) => m[1]))]
+          .filter((name) => !DEFAULT_VARIABLES.has(name))
+          .sort()
       : [];
 
   for (const namespace of NAMESPACES) {
