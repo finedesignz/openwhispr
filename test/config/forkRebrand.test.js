@@ -60,3 +60,13 @@ test("audioManager default agent-name fallback uses the fork brand, not a litera
   assert.match(src, /getAgentName\(\) : BRAND_NAME;/);
   assert.doesNotMatch(src, /getAgentName\(\) : "OpenWhispr"/);
 });
+
+test("agentName default is the fork brand; stored names are never rewritten", () => {
+  const src = fs.readFileSync(path.join(ROOT, "src", "utils", "agentName.ts"), "utf8");
+  assert.match(src, /import \{ BRAND_NAME \} from "\.\.\/config\/forkRuntime"/);
+  assert.match(src, /const DEFAULT_AGENT_NAME = BRAND_NAME;/);
+  assert.doesNotMatch(src, /DEFAULT_AGENT_NAME = "OpenWhispr"/);
+  // Only the unset fallback and the empty-save fallback use the default; a stored value wins.
+  assert.match(src, /localStorage\.getItem\(AGENT_NAME_KEY\) \|\| DEFAULT_AGENT_NAME/);
+  assert.doesNotMatch(src, /===\s*DEFAULT_AGENT_NAME|DEFAULT_AGENT_NAME\s*===/);
+});
