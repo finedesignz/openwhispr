@@ -3,6 +3,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const debugLogger = require("./debugLogger");
+const { BRAND_NAME } = require("../config/forkConfig");
 const { createAbortError } = require("./abortError");
 
 let cachedFFmpegPath = null;
@@ -123,7 +124,7 @@ function runFFmpegConversion(args, outputPath, { signal } = {}) {
     if (!ffmpegPath) {
       reject(
         new Error(
-          "FFmpeg not found - the bundled FFmpeg is missing from this install and no system FFmpeg was found on PATH; reinstalling OpenWhispr should fix this"
+          `FFmpeg not found - the bundled FFmpeg is missing from this install and no system FFmpeg was found on PATH; reinstalling ${BRAND_NAME} should fix this`
         )
       );
       return;

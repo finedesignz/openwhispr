@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { BRAND_NAME } from "../../config/forkRuntime";
 import { ArrowLeft } from "../icons";
 import type { PermissionGuideAction, PermissionGuideState } from "../../types/permissionGuide";
 
@@ -81,7 +82,7 @@ export function PermissionGuideCard({ state, onAction, onDrag }: CardProps): Rea
                 className="size-7"
               />
             )}
-            <span className="text-sm font-medium">OpenWhispr</span>
+            <span className="text-sm font-medium">{BRAND_NAME}</span>
             <span className="ms-auto text-[11px] text-[var(--onboarding-text-secondary)]">
               {t("onboarding.permissionGuide.missingApp")}
             </span>

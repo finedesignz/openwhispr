@@ -2,6 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const { spawnSync } = require("child_process");
 const { dialog } = require("electron");
+const { BRAND_NAME } = require("../config/forkConfig");
 const { getLinuxSessionInfo } = require("./linuxSession");
 
 function getLogger() {
@@ -169,7 +170,7 @@ async function ensureYdotool() {
       type: "warning",
       title: "Wayland Paste Setup",
       message: "ydotool is not fully configured. Auto-paste on Wayland may not work.",
-      detail: `The following issues were detected:\n\n${detail}\n\nAfter fixing, restart OpenWhispr.`,
+      detail: `The following issues were detected:\n\n${detail}\n\nAfter fixing, restart ${BRAND_NAME}.`,
     });
   }
 }
