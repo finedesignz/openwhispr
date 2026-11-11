@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const { createRendererServer, installBrowserGlobals } = require("../lib/rendererTestHarness");
 
 async function loadAudioManager(t) {
@@ -325,7 +326,7 @@ test("streaming auto-language routing detects and strips Arabic with an English 
 
   const manager = createStreamingManager(
     (result) => completions.push(result),
-    "يا OpenWhispr، لخّص هذه الملاحظة"
+    `يا ${BRAND_NAME}، لخّص هذه الملاحظة`
   );
   await manager.stopStreamingRecording();
 

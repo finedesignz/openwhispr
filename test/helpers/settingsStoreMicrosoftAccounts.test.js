@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const { createRendererServer, installBrowserGlobals } = require("../lib/rendererTestHarness");
 
 const SAVED_ACCOUNTS = [{ email: "a@corp.com" }];
@@ -10,7 +11,7 @@ async function startSettings(t, { mcalGetConnectionStatus, storageListeners = []
       mcalAccounts: JSON.stringify(SAVED_ACCOUNTS),
       // Already holds the agent name, so startup writes no dictionary and
       // starts no cloud sync that would outlive the test's module server.
-      customDictionary: '["OpenWhispr"]',
+      customDictionary: JSON.stringify([BRAND_NAME]),
     },
     window: {
       addEventListener(type, listener) {

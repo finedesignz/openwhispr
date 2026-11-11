@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 
 require.cache[require.resolve("electron")] = {
   exports: {
@@ -99,7 +100,7 @@ test("linux Hold reports the generic message when the listener binary is missing
     assert.equal(manager.supportsPushToTalk("F8"), false);
     assert.equal(
       manager.getPushToTalkUnavailableReason("F8"),
-      "Titanium Whisper's key listener isn't available."
+      `${BRAND_NAME}'s key listener isn't available.`
     );
   });
 });
@@ -235,7 +236,7 @@ test("Windows refuses listener-only hotkeys when the key listener is missing", a
     assert.equal(manager.supportsPushToTalk("F8"), false);
     assert.equal(
       manager.getPushToTalkUnavailableReason("F8"),
-      "Titanium Whisper's key listener isn't available."
+      `${BRAND_NAME}'s key listener isn't available.`
     );
     assert.equal(await manager.setActivationMode("push"), false);
     assert.equal(manager.getEffectiveDefaultHotkey(), "F8");

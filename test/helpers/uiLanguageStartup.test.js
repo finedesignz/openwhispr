@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -55,11 +56,11 @@ test("fresh Chinese browser locale survives settings hydration", async (t) => {
   installNavigatorLanguage(t, "zh-Hans-CN");
   installBrowserGlobals(t, {
     initialStorage: {
-      customDictionary: JSON.stringify(["OpenWhispr"]),
+      customDictionary: JSON.stringify([BRAND_NAME]),
     },
     window: {
       electronAPI: {
-        getDictionary: async () => ["OpenWhispr"],
+        getDictionary: async () => [BRAND_NAME],
         getUiLanguage: async () => "",
         setDictionary: async () => ({ success: true }),
       },
