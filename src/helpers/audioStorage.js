@@ -3,6 +3,7 @@ const path = require("path");
 const { app } = require("electron");
 const debugLogger = require("./debugLogger");
 const { parseDbTimestamp } = require("./dbTimestamp");
+const { BRAND_NAME } = require("../config/forkConfig");
 
 class AudioStorageManager {
   constructor() {
@@ -31,10 +32,10 @@ class AudioStorageManager {
         const pad = (n) => String(n).padStart(2, "0");
         const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
         const time = `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
-        return `OpenWhispr-${date}-${time}-${transcriptionId}.webm`;
+        return `${BRAND_NAME}-${date}-${time}-${transcriptionId}.webm`;
       }
     }
-    return `OpenWhispr-${transcriptionId}.webm`;
+    return `${BRAND_NAME}-${transcriptionId}.webm`;
   }
 
   saveAudio(transcriptionId, audioBuffer, timestamp) {
@@ -115,7 +116,7 @@ class AudioStorageManager {
           const stats = fs.statSync(filePath);
           if (stats.mtimeMs < cutoffMs) {
             fs.unlinkSync(filePath);
-            // Extract ID from "OpenWhispr-...-{id}.webm" or legacy "{id}.webm"
+            // Extract ID from "<brand>-...-{id}.webm" (any prefix, incl. legacy OpenWhispr-) or legacy "{id}.webm"
             const basename = path.basename(file, ".webm");
             const lastDash = basename.lastIndexOf("-");
             const id = lastDash !== -1 ? basename.slice(lastDash + 1) : basename;

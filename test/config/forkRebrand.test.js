@@ -53,3 +53,10 @@ test("renderer entry title and brand-bearing app icon use the new name", () => {
   const html = fs.readFileSync(path.join(ROOT, "src", "index.html"), "utf8");
   assert.match(html, /<title>EdgeAssistant<\/title>/);
 });
+
+test("audioManager default agent-name fallback uses the fork brand, not a literal", () => {
+  const src = fs.readFileSync(path.join(ROOT, "src", "helpers", "audioManager.js"), "utf8");
+  assert.match(src, /import \{ BRAND_NAME \} from "\.\.\/config\/forkRuntime"/);
+  assert.match(src, /getAgentName\(\) : BRAND_NAME;/);
+  assert.doesNotMatch(src, /getAgentName\(\) : "OpenWhispr"/);
+});
