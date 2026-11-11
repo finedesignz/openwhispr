@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const Module = require("node:module");
 
 const handlersModulePath = require.resolve("../../src/helpers/ipcHandlers");
@@ -186,10 +187,7 @@ test("Windows without its key listener reports Hold unavailable", async () => {
   );
 
   assert.equal(info.supportsPushToTalk, false);
-  assert.equal(
-    info.pushToTalkUnavailableReason,
-    "Titanium Whisper's key listener isn't available."
-  );
+  assert.equal(info.pushToTalkUnavailableReason, `${BRAND_NAME}'s key listener isn't available.`);
   assert.equal(info.linuxInputAccessDenied, false);
 });
 

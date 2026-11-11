@@ -15,7 +15,8 @@ test("electron-builder fork config matches the runtime identity", () => {
   assert.equal(builder.appId, fork.APP_ID);
   assert.equal(builder.productName, fork.BRAND_NAME);
   assert.deepEqual(builder.protocols.schemes, [fork.URL_SCHEME]);
-  assert.equal(fork.USER_DATA_DIR, fork.BRAND_NAME);
+  // userData stays on the folder existing installs use; it is not derived from the brand.
+  assert.equal(fork.USER_DATA_DIR, "Titanium Whisper");
   assert.notEqual(fork.APP_ID, "com.gizmolabs.openwhispr");
   assert.match(
     fork.WINDOWS_TRAY_GUID,

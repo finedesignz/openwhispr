@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const fs = require("node:fs");
 const path = require("node:path");
 const { createRendererServer, installBrowserGlobals } = require("../lib/rendererTestHarness");
@@ -338,7 +339,7 @@ test("a repository main may not have seen all of is a name to check, not an inst
   assert.equal("installUrl" in unlisted.data, false);
   assert.equal(
     unlisted.displayText,
-    "Couldn't confirm the Titanium Whisper GitHub App is installed there."
+    `Couldn't confirm the ${BRAND_NAME} GitHub App is installed there.`
   );
   assert.match(missing.data.guidance, /install the OpenWhispr GitHub App/);
   assert.equal(missing.data.installUrl, GITHUB.manageUrl);

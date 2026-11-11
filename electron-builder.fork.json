@@ -1,10 +1,11 @@
 {
   "extends": "./electron-builder.json",
   "appId": "com.titaniumlabs.titaniumwhisper",
-  "productName": "Titanium Whisper",
+  "productName": "EdgeAssistant",
+  "executableName": "edgeassistant",
   "copyright": "Copyright \u00a9 Titanium Labs LLC. Based on OpenWhispr (MIT).",
   "protocols": {
-    "name": "Titanium Whisper Protocol",
+    "name": "EdgeAssistant Protocol",
     "schemes": ["titaniumwhisper"]
   },
   "win": {
@@ -20,8 +21,9 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Titanium Whisper",
-    "uninstallDisplayName": "Titanium Whisper",
+    "shortcutName": "EdgeAssistant",
+    "artifactName": "EdgeAssistant-Setup-${version}.${ext}",
+    "uninstallDisplayName": "EdgeAssistant",
     "include": "resources/nsis/installer.nsh"
   },
   "publish": {

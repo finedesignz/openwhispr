@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const { createRendererServer, installBrowserGlobals } = require("../lib/rendererTestHarness");
 
 test("startup syncs the full saved notification snapshot once", async (t) => {
@@ -10,7 +11,7 @@ test("startup syncs the full saved notification snapshot once", async (t) => {
       notifyMeetingDetection: "true",
       notifyCalendarReminders: "false",
       meetingProcessDetection: "false",
-      customDictionary: '["OpenWhispr"]',
+      customDictionary: JSON.stringify([BRAND_NAME]),
     },
     window: {
       electronAPI: {

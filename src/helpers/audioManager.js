@@ -4,6 +4,7 @@ import {
   TRUNCATED_OUTPUT_MESSAGE_KEY,
 } from "../services/ai/chatRequestBody";
 import logger from "../utils/logger";
+import { BRAND_NAME } from "../config/forkRuntime";
 import { assertValidCleanupOutput } from "../utils/cleanupOutput";
 import { isAzureOpenAIEndpoint } from "../utils/urlUtils";
 import { withSessionRefresh } from "../lib/auth";
@@ -3376,7 +3377,7 @@ registerProcessor("pcm-streaming-processor", PCMStreamingProcessor);
     const cleanupReachable = !!settings.useCleanupModel && (!!cleanupModel || isCloud);
     const agentReachable = dictationAgentReachable(settings);
     const agentName =
-      typeof window !== "undefined" && window.localStorage ? getAgentName() : "OpenWhispr";
+      typeof window !== "undefined" && window.localStorage ? getAgentName() : BRAND_NAME;
     if (
       !cleanupReachable &&
       !agentReachable &&

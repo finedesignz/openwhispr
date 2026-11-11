@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 const React = require("react");
 const { createRoot } = require("react-dom/client");
 const {
@@ -68,6 +69,6 @@ test("the mount effect recovers interrupted recordings with the translated messa
   });
 
   assert.deepEqual(recoveries, [
-    "Recovered after Titanium Whisper closed before this dictation finished.",
+    "Recovered after " + BRAND_NAME + " closed before this dictation finished.",
   ]);
 });

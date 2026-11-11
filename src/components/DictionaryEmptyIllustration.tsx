@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { BRAND_NAME } from "../config/forkRuntime";
 import { NotebookPen, PanelRight } from "./icons";
 
 interface DictionaryEmptyIllustrationProps {
@@ -75,7 +76,7 @@ export default function DictionaryEmptyIllustration({ variant }: DictionaryEmpty
             <span className="italic text-foreground/50 line-through dark:text-foreground/65">
               open whisper
             </span>
-            <span className="font-medium text-primary">OpenWhispr</span>
+            <span className="font-medium text-primary">{BRAND_NAME}</span>
           </span>
           <span
             dir="ltr"

@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { BRAND_NAME } = require("../../src/config/fork.config.json");
 
 // A modifier-only chord has no regular key, so Electron cannot build an
 // accelerator for it. Registering one always fails; the low-level listener is
@@ -114,7 +115,7 @@ test("a missing listener binary reports the push-to-talk unavailable message", a
 
   assert.equal(result.success, false);
   // setupShortcuts appends "Try: <suggestions>" to whatever the failure carried.
-  assert.equal(result.error.startsWith("Titanium Whisper's key listener isn't available."), true);
+  assert.equal(result.error.startsWith(`${BRAND_NAME}'s key listener isn't available.`), true);
 });
 
 // Windows answers through its own probe (windows-key-listener.exe); macOS watches
