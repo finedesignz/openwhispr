@@ -91,6 +91,31 @@ test("extractSignInUrl returns the first allowlisted URL only", () => {
   assert.strictEqual(mod.extractSignInUrl("claude", "http://claude.ai/x"), null);
 });
 
+// Structure captured from `claude setup-token` v2.1.330 under node-pty: Ink draws
+// with cursor-forward (CSI nC) for spaces and cursor-position (CSI r;cH) per row,
+// and wraps the URL in an OSC 8 hyperlink. The token below is fake.
+const CLAUDE_TUI_URL = "https://claude.ai/oauth/authorize?FAKEtokenFAKEtokenFAKEtokenFAKEtoken01";
+const CLAUDE_TUI_FRAME =
+  "Browser didn't open?\x1b[1CUse the URL\x1b[1Cbelow\x1b[1Cto\x1b[1Csign\x1b[1Cin\x1b[1C(c\x1b[1Cto\x1b[1Ccopy)" +
+  `\x1b]8;id=u-1;${CLAUDE_TUI_URL}\x1b\\` +
+  `\x1b[22;1H${CLAUDE_TUI_URL}\x1b]8;;\x1b\\` +
+  "\x1b[24;2HHold\x1b[1CShift\x1b[1Cwhile\x1b[1Cselecting\x1b[1Cto\x1b[1Cuse\x1b[1Cyour\x1b[1Cterminal's\x1b[1Cnative\x1b[1Ccopy" +
+  "\x1b[26;2HPaste\x1b[1Ccode\x1b[1Chere\x1b[1Cif\x1b[1Cprompted";
+
+test("extractSignInUrl returns the Ink OSC 8 target without the neighbouring hint text", () => {
+  assert.strictEqual(mod.extractSignInUrl("claude", CLAUDE_TUI_FRAME), CLAUDE_TUI_URL);
+});
+
+test("extractSignInUrl stops the visible URL at a cursor move when there is no hyperlink", () => {
+  const noOsc = CLAUDE_TUI_FRAME.replace(/\x1b\]8;[^\x1b]*\x1b\\/g, "");
+  assert.strictEqual(mod.extractSignInUrl("claude", noOsc), CLAUDE_TUI_URL);
+});
+
+test("stripAnsi turns cursor moves into spaces and line breaks", () => {
+  assert.strictEqual(mod.stripAnsi("a\x1b[1Cb\x1b[3Cc"), "a b   c");
+  assert.strictEqual(mod.stripAnsi("a\x1b[22;1Hb"), "a\nb");
+});
+
 test("extractDeviceCode needs a device URL and a letter in the code", () => {
   const text = "Open https://auth.openai.com/codex/device\nEnter code: ABCD-EFGH\n";
   assert.strictEqual(mod.extractDeviceCode(text), "ABCD-EFGH");

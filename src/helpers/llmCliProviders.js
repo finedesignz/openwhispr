@@ -741,6 +741,11 @@ function capInput(text) {
 function stripAnsi(text) {
   let out = capInput(text);
   out = out.replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, "");
+  // Full-screen TUIs (Ink) place text with cursor moves instead of spaces and
+  // newlines. Deleting them glues separate screen regions into one token, so a
+  // move to another row becomes a line break and a forward move becomes spaces.
+  out = out.replace(/\x1b\[(\d*)C/g, (_m, n) => " ".repeat(Math.min(Number(n) || 1, 200)));
+  out = out.replace(/\x1b\[[0-9;]*[HfABEFd]/g, "\n");
   out = out.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "");
   out = out.replace(/\x1b[@-Z\\-_]/g, "");
   out = out.replace(/\r\n/g, "\n");
@@ -867,7 +872,25 @@ function subjectMatchesPublisher(subject, publisher) {
   return rdns.filter(([key]) => key === "O").every(([, value]) => value === publisher);
 }
 
+// An OSC 8 hyperlink target is the exact URL the CLI wants opened, delimited by
+// its terminator, so it cannot pick up neighbouring screen text.
+function extractHyperlinkUrls(text) {
+  const urls = [];
+  const re = /\x1b\]8;[^;\x07\x1b]*;(https:\/\/[^\x07\x1b\s]{1,2000})(?:\x07|\x1b\\)/g;
+  const capped = capInput(text);
+  let m;
+  let guard = 0;
+  while ((m = re.exec(capped)) !== null && guard < 200) {
+    guard += 1;
+    urls.push(m[1]);
+  }
+  return urls;
+}
+
 function extractSignInUrl(seat, text) {
+  for (const url of extractHyperlinkUrls(text)) {
+    if (isAllowedSignInUrl(seat, url)) return url;
+  }
   const joined = joinWrappedLines(stripAnsi(text));
   const re = /https:\/\/[^\s<>"'\x00-\x1f]{1,2000}/g;
   let m;
