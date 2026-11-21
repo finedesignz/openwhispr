@@ -7,6 +7,22 @@ const providers = require("../../src/helpers/llmCliProviders.js");
 const NOT_ENABLED = { claudeEnabled: false };
 const ENABLED = { claudeEnabled: true };
 
+test("pendingPromptEvent restores a live sign-in's prompt after a remount, nothing otherwise", () => {
+  const prompt = { kind: "browser", url: "https://claude.ai/oauth/authorize", awaitingCode: true };
+  const state = { status: "signing-in", prompt };
+  const event = view.pendingPromptEvent("claude", state);
+  assert.deepEqual(event, { type: "signin-prompt", seat: "claude", ...prompt });
+
+  const model = view.signInPromptModel("claude", event);
+  assert.equal(model.showCodeInput, true);
+  assert.equal(model.url, prompt.url);
+  assert.deepEqual(view.seatViewModel("claude", state, ENABLED).actions, ["cancelSignin"]);
+
+  assert.equal(view.pendingPromptEvent("claude", { status: "signed-out", prompt }), null);
+  assert.equal(view.pendingPromptEvent("claude", { status: "signing-in" }), null);
+  assert.equal(view.pendingPromptEvent("claude", undefined), null);
+});
+
 function actionsFor(seat, state, prefs = NOT_ENABLED, platform = "win32") {
   return view.seatViewModel(seat, state, prefs, platform).actions;
 }

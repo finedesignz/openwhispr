@@ -128,6 +128,16 @@ export function signOutConfirmModel(seat) {
 }
 
 /**
+ * The `signin-prompt` event a live sign-in is still owed, rebuilt from the seat
+ * state main holds. A window that remounts mid-flow missed the one-shot event;
+ * this restores its code box and Cancel.
+ */
+export function pendingPromptEvent(seat, state) {
+  if (!state || state.status !== "signing-in" || !state.prompt) return null;
+  return { type: "signin-prompt", seat, ...state.prompt };
+}
+
+/**
  * Sign-in prompt for a main `signin-prompt` event. Text from the CLI is shown
  * as plain text; the open-in-browser button needs an allowlisted host.
  */

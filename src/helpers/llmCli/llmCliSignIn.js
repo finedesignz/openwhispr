@@ -53,6 +53,13 @@ function createSignIn({
     return true;
   }
 
+  // The pending prompt lives in the seat state (main owns it, in memory only),
+  // so a window that remounts mid-flow restores it; the event is the live push.
+  function surfacePrompt(seat, prompt) {
+    detector.apply(seat, { type: "SIGNIN_PROMPT", ...prompt });
+    emit({ type: "signin-prompt", seat, ...prompt });
+  }
+
   // ---- claude: pty setup-token ----
   function startClaude(exe) {
     const childEnv = { ...policy.buildChildEnv("claude", env), BROWSER: "true" };
@@ -94,7 +101,7 @@ function createSignIn({
           return;
         }
         // The truth is the stored-token presence, not the failed attempt.
-        await detector.detectOne("claude");
+        await detector.detectOne("claude", { force: true });
         resolve({ ok: false, code });
       };
 
@@ -123,13 +130,7 @@ function createSignIn({
           if (url) {
             urlOpened = true;
             void openAllowed("claude", url);
-            emit({
-              type: "signin-prompt",
-              seat: "claude",
-              kind: "browser",
-              url,
-              awaitingCode: true,
-            });
+            surfacePrompt("claude", { kind: "browser", url, awaitingCode: true });
           }
         }
         captureToken(false);
@@ -179,7 +180,7 @@ function createSignIn({
       };
       const timer = setTimeout(async () => {
         killTree(child);
-        await detector.detectOne(seat);
+        await detector.detectOne(seat, { force: true });
         finish({ ok: false, code: "timeout" });
       }, limits.signInMs);
 
@@ -192,7 +193,7 @@ function createSignIn({
         if (url && code) {
           prompted = true;
           void openAllowed(seat, url);
-          emit({ type: "signin-prompt", seat, kind: "device-code", url, code });
+          surfacePrompt(seat, { kind: "device-code", url, code });
         }
       };
       child.stdout.on("data", onData);
@@ -204,7 +205,7 @@ function createSignIn({
       child.on("close", async (exitCode) => {
         if (settled) return;
         if (exitCode === 0) {
-          const state = await detector.detectOne(seat);
+          const state = await detector.detectOne(seat, { force: true });
           if (state && state.status === "signed-in") {
             finish({ ok: true });
             return;
@@ -215,7 +216,7 @@ function createSignIn({
       });
       flow.cancel = async () => {
         killTree(child);
-        await detector.detectOne(seat);
+        await detector.detectOne(seat, { force: true });
         finish({ ok: false, code: "killed" });
       };
     }).finally(() => flows.delete(seat));
@@ -245,7 +246,12 @@ function createSignIn({
 
   async function start({ seat } = {}) {
     if (!policy.getProvider(seat)) return { ok: false, code: "invalid-input" };
-    if (flows.has(seat)) return { ok: false, code: "busy" };
+    if (flows.has(seat)) {
+      // A second Sign in during a live flow resurfaces its prompt, not an error.
+      const { prompt } = detector.getState(seat);
+      if (prompt) emit({ type: "signin-prompt", seat, ...prompt });
+      return { ok: true, resumed: true };
+    }
     const exe = detector.resolveExe(seat);
     if (!exe) return { ok: false, code: "not-installed" };
     switch (policy.signInSpec(seat).kind) {

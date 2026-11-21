@@ -285,6 +285,53 @@ test("agy is installed with authKnown false until a successful Test", async () =
   assert.equal(detector.getState("agy").authKnown, true);
 });
 
+test("a live sign-in is never clobbered by a detect; a forced detect settles it", async () => {
+  const exe = "C:\\Users\\u\\.local\\bin\\claude.exe";
+  const { detector, calls } = makeDetector({
+    files: [exe],
+    script: seatScript("claude", "claude.exe"),
+    tokenStore: { has: () => false },
+  });
+  assert.equal((await detector.detectOne("claude")).status, "signed-out");
+  detector.apply("claude", { type: "SIGNIN_START" });
+  detector.apply("claude", {
+    type: "SIGNIN_PROMPT",
+    kind: "browser",
+    url: "u",
+    awaitingCode: true,
+  });
+  const probesBefore = calls.length;
+
+  const seen = [];
+  detector.onChange((seat, state) => seen.push([seat, state.status]));
+  for (const run of [detector.detectOne("claude"), detector.detectAll()]) await run;
+  const states = detector.getStates();
+  assert.equal(states.claude.status, "signing-in");
+  assert.equal(states.claude.prompt.kind, "browser");
+  assert.equal(calls.length, probesBefore, "a held seat is not even probed");
+  assert.deepEqual(
+    seen.filter(([seat]) => seat === "claude"),
+    []
+  );
+
+  const settled = await detector.detectOne("claude", { force: true });
+  assert.equal(settled.status, "signed-out");
+  assert.equal("prompt" in settled, false);
+});
+
+test("a sign-in that starts while a detect is in flight is not overwritten by it", async () => {
+  const exe = "C:\\Users\\u\\.local\\bin\\claude.exe";
+  const { detector } = makeDetector({
+    files: [exe],
+    script: seatScript("claude", "claude.exe"),
+    tokenStore: { has: () => false },
+  });
+  const inFlight = detector.detectOne("claude");
+  detector.apply("claude", { type: "SIGNIN_START" });
+  assert.equal((await inFlight).status, "signing-in");
+  assert.equal(detector.getState("claude").status, "signing-in");
+});
+
 test("Re-detect re-runs everything and emits state changes", async () => {
   const { detector, fs } = makeDetector({
     files: ["D:\\tools\\grok.exe"],

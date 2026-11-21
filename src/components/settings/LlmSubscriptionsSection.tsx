@@ -13,6 +13,7 @@ import {
   SEATS,
   errorMessageKey,
   installDialogModel,
+  pendingPromptEvent,
   seatViewModel,
   signInPromptModel,
   signOutConfirmModel,
@@ -75,7 +76,10 @@ export default function LlmSubscriptionsSection() {
         {SEATS.map((seat: LlmCliSeat) => {
           const view = seatViewModel(seat, cli.seats[seat], cli.prefs, platform);
           const errorKey = errorMessageKey(cli.errors[seat]) ?? view.errorKey;
-          const prompt = signInPromptModel(seat, cli.prompts[seat]);
+          const prompt = signInPromptModel(
+            seat,
+            cli.prompts[seat] ?? pendingPromptEvent(seat, cli.seats[seat])
+          );
           const lines = cli.installLines[seat] ?? [];
           const has = (action: string) => view.actions.includes(action);
           return (

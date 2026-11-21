@@ -3,6 +3,7 @@ const assert = require("node:assert");
 const { EventEmitter } = require("events");
 
 const { createSignIn, agyTerminalLaunch } = require("../../src/helpers/llmCli/llmCliSignIn");
+const policy = require("../../src/helpers/llmCliProviders.js");
 
 const TOKEN = `sk-ant-oat01-${"Qw3_-".repeat(24)}`; // 13 + 120 chars, valid alphabet
 const ENV = { SystemRoot: "C:\\Windows", ANTHROPIC_API_KEY: "sk-ant-api03-should-be-scrubbed" };
@@ -10,10 +11,16 @@ const ENV = { SystemRoot: "C:\\Windows", ANTHROPIC_API_KEY: "sk-ant-api03-should
 function makeDetector({ detectState = { status: "signed-in" }, probeCodes = {} } = {}) {
   const applied = [];
   const probes = [];
+  const states = {};
   return {
     applied,
     probes,
-    apply: (seat, event) => applied.push([seat, event.type, event.code]),
+    apply: (seat, event) => {
+      applied.push([seat, event.type, event.code]);
+      states[seat] = policy.reduceSeatState(states[seat], event);
+      return states[seat];
+    },
+    getState: (seat) => states[seat] || policy.initialSeatState(),
     resolveExe: (seat) => `C:\\bin\\${seat}.exe`,
     detectOne: async (seat) => {
       applied.push([seat, "DETECT_ONE"]);
@@ -182,13 +189,60 @@ test("claude sign-in never opens a disallowed url", async () => {
   await h.signIn.cancel("claude");
 });
 
-test("claude: a pty that exits without a token is not-signed-in; second start while active is busy", async () => {
+test("claude: a pty that exits without a token is not-signed-in", async () => {
   const h = makeClaudeHarness();
   const started = await h.signIn.start({ seat: "claude" });
-  assert.equal((await h.signIn.start({ seat: "claude" })).code, "busy");
   h.pty.exitCb({ exitCode: 1 });
   assert.deepEqual(await started.done, { ok: false, code: "not-signed-in" });
   assert.deepEqual(h.saved, []);
+});
+
+test("claude: the pending prompt is held in the seat state; a second Sign in resurfaces it", async () => {
+  const h = makeClaudeHarness();
+  const started = await h.signIn.start({ seat: "claude" });
+  assert.equal(h.detector.getState("claude").status, "signing-in");
+  assert.equal(h.detector.getState("claude").prompt, undefined);
+
+  // Second click before the url is known: no error, nothing to resurface yet.
+  assert.deepEqual(await h.signIn.start({ seat: "claude" }), { ok: true, resumed: true });
+  assert.equal(h.events.length, 0);
+
+  const url = "https://claude.ai/oauth/authorize?code=true&client_id=abc";
+  h.pty.dataCb(`${url}\r\nPaste code here\r\n`);
+  await tick();
+  assert.deepEqual(h.detector.getState("claude").prompt, {
+    kind: "browser",
+    url,
+    awaitingCode: true,
+  });
+  assert.equal(h.events.length, 1);
+
+  // The window remounted and lost the one-shot event: Sign in resurfaces it.
+  const again = await h.signIn.start({ seat: "claude" });
+  assert.deepEqual(again, { ok: true, resumed: true });
+  assert.equal(h.events.length, 2);
+  assert.deepEqual(h.events[1], h.events[0]);
+  assert.equal(h.ptyCalls.length, 1, "no second pty is spawned");
+  assert.equal(h.opened.length, 1, "the browser is not opened again");
+
+  // The same code box still drives the one live flow.
+  assert.deepEqual(h.signIn.submitCode({ seat: "claude", code: "AUTH-CODE#state" }), { ok: true });
+  await h.signIn.cancel("claude");
+  assert.deepEqual(await started.done, { ok: false, code: "killed" });
+  assert.equal(h.signIn.isActive("claude"), false);
+});
+
+test("claude: every settling detect is forced so the held signing-in state can end", async () => {
+  const h = makeClaudeHarness();
+  const run = await h.signIn.start({ seat: "claude" });
+  const forced = [];
+  h.detector.detectOne = async (seat, options) => {
+    forced.push([seat, options]);
+    return { status: "signed-out" };
+  };
+  await h.signIn.cancel("claude");
+  await run.done;
+  assert.deepEqual(forced, [["claude", { force: true }]]);
 });
 
 test("claude: a flow older than signInMs is cancelled and killed; cancel kills the pty", async () => {
@@ -289,10 +343,19 @@ for (const [seat, banner] of [
   });
 }
 
-test("device flow: second start is busy; cancel kills the child; timeout kills it", async () => {
+test("device flow: second start resurfaces the code; cancel kills the child; timeout kills it", async () => {
   const h = makeDeviceHarness("codex");
   const started = await h.signIn.start({ seat: "codex" });
-  assert.equal((await h.signIn.start({ seat: "codex" })).code, "busy");
+  h.child.stdout.emit(
+    "data",
+    Buffer.from("Open https://auth.openai.com/codex/device and enter code ABCD-1234\n")
+  );
+  await tick();
+  assert.equal(h.events.length, 1);
+  assert.equal(h.detector.getState("codex").prompt.code, "ABCD-1234");
+  assert.deepEqual(await h.signIn.start({ seat: "codex" }), { ok: true, resumed: true });
+  assert.equal(h.events.length, 2);
+  assert.equal(h.events[1].code, "ABCD-1234");
   await h.signIn.cancel("codex");
   assert.equal(h.child.killedTree, true);
   assert.deepEqual(await started.done, { ok: false, code: "killed" });

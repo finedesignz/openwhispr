@@ -498,6 +498,20 @@ function initialSeatState() {
   return { status: "missing" };
 }
 
+// A live sign-in owns its seat. Main holds the pending prompt in the seat state
+// so a window that remounts mid-flow restores it from detect or a state event.
+const SIGNIN_PROMPT_KINDS = Object.freeze(["browser", "device-code"]);
+
+function isSigningIn(state) {
+  return !!state && state.status === "signing-in";
+}
+
+function withoutPrompt(state) {
+  const next = { ...state };
+  delete next.prompt;
+  return next;
+}
+
 function reduceSeatState(state, event) {
   const prev = state || initialSeatState();
   if (!event || typeof event.type !== "string") return prev;
@@ -534,11 +548,23 @@ function reduceSeatState(state, event) {
     case "INSTALL_FAIL":
       return { status: "error", errorCode: event.code || "install-failed" };
     case "SIGNIN_START":
-      return { ...prev, status: "signing-in" };
+      return { ...withoutPrompt(prev), status: "signing-in" };
+    case "SIGNIN_PROMPT": {
+      if (!isSigningIn(prev) || !SIGNIN_PROMPT_KINDS.includes(event.kind)) return prev;
+      const prompt = { kind: event.kind };
+      if (typeof event.url === "string") prompt.url = event.url;
+      if (typeof event.code === "string") prompt.code = event.code;
+      if (event.awaitingCode === true) prompt.awaitingCode = true;
+      return { ...prev, prompt };
+    }
     case "SIGNIN_DONE":
-      return { ...prev, status: "signed-in", errorCode: undefined };
+      return { ...withoutPrompt(prev), status: "signed-in", errorCode: undefined };
     case "SIGNIN_FAIL":
-      return { ...prev, status: "signed-out", errorCode: event.code || "not-signed-in" };
+      return {
+        ...withoutPrompt(prev),
+        status: "signed-out",
+        errorCode: event.code || "not-signed-in",
+      };
     case "SIGNOUT_DONE":
       return { ...prev, status: "signed-out" };
     case "RUN_ERROR":
@@ -1036,6 +1062,7 @@ export {
   redactSecrets,
   initialSeatState,
   reduceSeatState,
+  isSigningIn,
   CLI_SCOPE_ALLOWLIST,
   isSeatEnabled,
   cliProviderIdsForScope,

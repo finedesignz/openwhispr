@@ -202,9 +202,15 @@ function createDetector({
     }
   }
 
-  async function detectOne(seat) {
+  // A probe-driven detect (mount, Re-detect, detectAll) never overwrites a
+  // live sign-in. Only the sign-in flow itself settles it, with `force`, after
+  // which the seat is probed for the truth. Checked again after every await,
+  // since a flow can start while a probe is in flight.
+  async function detectOne(seat, { force = false } = {}) {
     const provider = policy.getProvider(seat);
     if (!provider) return null;
+    const held = () => !force && policy.isSigningIn(states.get(seat));
+    if (held()) return states.get(seat);
     const exe = resolveExe(seat);
     if (!exe) {
       const seen = lastSeen.get(seat);
@@ -220,6 +226,7 @@ function createDetector({
       env: childEnv,
       timeoutMs: limits.versionMs,
     });
+    if (held()) return states.get(seat);
     const version = policy.parseVersion(seat, `${versionRun.stdout}\n${versionRun.stderr}`);
     if (!version) {
       let errorCode = "exit-nonzero";
@@ -232,11 +239,13 @@ function createDetector({
       env: childEnv,
       timeoutMs: limits.helpMs,
     });
+    if (held()) return states.get(seat);
     const missingFlags = policy.missingRequiredFlags(seat, `${helpRun.stdout}\n${helpRun.stderr}`);
     const detected = apply(seat, { type: "DETECTED", version, path: exe, missingFlags });
     if (detected.status !== "installed") return detected;
 
     const auth = await probeAuth(seat, exe, childEnv);
+    if (held()) return states.get(seat);
     if (auth === null) return setState(seat, { ...detected, authKnown: false });
     return apply(seat, { type: "AUTH", result: auth });
   }

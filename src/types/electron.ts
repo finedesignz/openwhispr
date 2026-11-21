@@ -75,6 +75,13 @@ export interface LlmCliSeatState {
   errorCode?: string;
   lastError?: string;
   authKnown?: boolean;
+  /** The live sign-in's pending prompt; present only while status is "signing-in". */
+  prompt?: {
+    kind: "browser" | "device-code";
+    url?: string;
+    code?: string;
+    awaitingCode?: boolean;
+  };
 }
 export type LlmCliSeatStates = Record<LlmCliSeat, LlmCliSeatState>;
 export interface LlmCliPrefs {

@@ -361,6 +361,46 @@ test("reducer transition table", () => {
   assert.strictEqual(r(unchanged, null), unchanged);
 });
 
+test("reducer: a live sign-in carries its pending prompt and drops it when the flow ends", () => {
+  const r = mod.reduceSeatState;
+  const signing = r({ status: "signed-out", version: "2.1.330" }, { type: "SIGNIN_START" });
+  assert.strictEqual(mod.isSigningIn(signing), true);
+  assert.strictEqual(signing.prompt, undefined);
+
+  const prompted = r(signing, {
+    type: "SIGNIN_PROMPT",
+    kind: "browser",
+    url: "https://claude.ai/oauth/authorize?code=true",
+    awaitingCode: true,
+    secret: "ignored",
+  });
+  assert.deepStrictEqual(prompted.prompt, {
+    kind: "browser",
+    url: "https://claude.ai/oauth/authorize?code=true",
+    awaitingCode: true,
+  });
+  assert.strictEqual(prompted.status, "signing-in");
+  assert.strictEqual(prompted.version, "2.1.330");
+
+  const device = r(signing, { type: "SIGNIN_PROMPT", kind: "device-code", url: "u", code: "ABCD" });
+  assert.deepStrictEqual(device.prompt, { kind: "device-code", url: "u", code: "ABCD" });
+
+  assert.strictEqual("prompt" in r(prompted, { type: "SIGNIN_DONE" }), false);
+  assert.strictEqual("prompt" in r(prompted, { type: "SIGNIN_FAIL", code: "timeout" }), false);
+  assert.strictEqual("prompt" in r(prompted, { type: "SIGNIN_START" }), false);
+  assert.strictEqual("prompt" in r(prompted, { type: "DETECTED", version: "1" }), false);
+});
+
+test("reducer: a prompt is ignored unless a sign-in is live and its kind is known", () => {
+  const r = mod.reduceSeatState;
+  const idle = { status: "signed-out" };
+  assert.strictEqual(r(idle, { type: "SIGNIN_PROMPT", kind: "browser", url: "u" }), idle);
+  const signing = { status: "signing-in" };
+  assert.strictEqual(r(signing, { type: "SIGNIN_PROMPT", kind: "terminal-guide" }), signing);
+  assert.strictEqual(mod.isSigningIn(idle), false);
+  assert.strictEqual(mod.isSigningIn(undefined), false);
+});
+
 test("claude gate (D-04): only claude is gated", () => {
   assert.strictEqual(mod.isSeatEnabled("claude", { claudeEnabled: false }), false);
   assert.strictEqual(mod.isSeatEnabled("claude", {}), false);
